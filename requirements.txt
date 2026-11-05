@@ -1,0 +1,9 @@
+pymupdf==2.1
+mammoth
+markdownify
+python-pptx
+openpyxl
+xlrd
+pytesseract
+pillow
+tkinterdnd2

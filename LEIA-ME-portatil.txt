@@ -1,0 +1,62 @@
+CONVERSOR PARA MARKDOWN (VERSÃO PORTÁTIL)
+
+Tudo roda no computador. Nenhum arquivo é enviado para a internet.
+Não precisa instalar nada, nem Python, nem ter permissão de administrador.
+
+PARA LEVAR PARA OUTRO COMPUTADOR
+1. Copie o arquivo .zip (pen drive, mensageiro, rede).
+2. No outro computador, clique com o botão direito no .zip e escolha
+   "Extrair tudo". Não rode o programa de dentro do .zip sem extrair.
+3. Abra a pasta extraída e dê dois cliques em "Conversor Markdown.exe".
+   Se quiser, clique com o botão direito no .exe e crie um atalho na
+   Área de Trabalho.
+
+Na primeira vez, o Windows pode mostrar o aviso "O Windows protegeu o
+computador". Clique em "Mais informações" e depois em "Executar assim
+mesmo". Isso acontece com programas que não têm assinatura digital
+comercial.
+
+COMO USAR
+Jeito mais rápido: arraste arquivos ou pastas para dentro da janela.
+A conversão começa sozinha (dá para desligar na opção "Converter
+automaticamente ao soltar arquivos"). Também funciona arrastar os
+arquivos direto sobre o "Conversor Markdown.exe" ou sobre o atalho dele.
+
+Pelos botões:
+1. Em "Origem", clique em "Pasta..." para converter uma pasta inteira,
+   ou em "Arquivos..." para escolher arquivos soltos.
+2. Em "Salvar em", escolha onde os arquivos .md serão gravados.
+   Se você não escolher, eles vão para uma pasta "markdown" ao lado
+   dos originais. A estrutura de subpastas da origem é mantida.
+3. Clique em "Converter". O andamento aparece na janela.
+
+FORMATOS ACEITOS
+PDF, Word (.docx), PowerPoint (.pptx), Excel (.xlsx, .xlsm, .xls), CSV
+e imagens (.png, .jpg, .jpeg, .tif, .tiff, .bmp, .gif, .webp).
+
+OPÇÕES
+- Usar OCR: lê o texto de imagens, de PDFs escaneados e de figuras dentro
+  de Word e PowerPoint (português e inglês). Deixa a conversão mais lenta.
+- Incluir subpastas: percorre todas as pastas internas da origem.
+- Sobrescrever .md existentes: se desmarcado, arquivos já convertidos são pulados.
+
+LIMITAÇÕES
+- Arquivos antigos .doc e .ppt não são convertidos. Abra no Office e salve
+  como .docx ou .pptx.
+- PDFs protegidos por senha não são convertidos.
+- Em planilhas, fórmulas mostram o valor salvo pelo Excel. Se o arquivo
+  nunca foi aberto no Excel, aparece a própria fórmula.
+- OCR depende da qualidade da imagem. Revise textos importantes.
+- Funciona em Windows 10 e 11 de 64 bits.
+
+ERROS
+Se algum arquivo falhar, os detalhes ficam em "_erros_conversao.log"
+na pasta de saída. Os demais arquivos continuam sendo convertidos.
+
+NÃO APAGUE
+A pasta "_internal" e a pasta "Tesseract-OCR" precisam ficar junto do .exe.
+
+LICENÇA E CÓDIGO-FONTE
+Software livre sob a GNU AGPL v3. Código-fonte, novas versões e
+instruções para compilar: https://github.com/n-lobato/conversor-markdown
+As licenças de todos os componentes incluídos estão na pasta "LICENCAS".
