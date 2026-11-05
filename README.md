@@ -1,5 +1,9 @@
 # Conversor Markdown
 
+## [Baixar o programa para Windows (.zip, 159 MB)](https://github.com/n-lobato/conversor-markdown/releases/latest/download/Conversor-Markdown-v1.0.0-windows-x64.zip)
+
+> **Atenção:** não use o botão verde **Code > Download ZIP**. Ele baixa só o código-fonte, que não roda sem Python instalado. O programa pronto é o link acima, também disponível na página de [Releases](https://github.com/n-lobato/conversor-markdown/releases/latest).
+
 Programa para Windows que converte PDF, Word, PowerPoint, Excel, CSV e imagens em Markdown, em lote, **sem enviar nada para a internet**. Tudo roda no próprio computador, inclusive o OCR.
 
 Feito para quem precisa preparar documentos para ferramentas de IA, bases de conhecimento ou anotações, mas não quer (ou não pode) subir arquivos para serviços online.
@@ -19,7 +23,7 @@ Muitos conversores online pedem o upload do documento. Para contratos, processos
 
 ## Download
 
-Baixe o arquivo `.zip` da versão mais recente em **[Releases](https://github.com/n-lobato/conversor-markdown/releases/latest)**.
+Baixe o arquivo **[Conversor-Markdown-v1.0.0-windows-x64.zip](https://github.com/n-lobato/conversor-markdown/releases/latest/download/Conversor-Markdown-v1.0.0-windows-x64.zip)** na página de **[Releases](https://github.com/n-lobato/conversor-markdown/releases/latest)**. Não confunda com o "Download ZIP" do botão verde Code, que traz apenas o código-fonte.
 
 1. Extraia o `.zip` (botão direito > Extrair tudo).
 2. Abra `Conversor Markdown.exe`.
