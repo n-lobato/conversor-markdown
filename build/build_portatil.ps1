@@ -40,12 +40,22 @@ $dlls = 'libarchive-13.dll', 'libb2-1.dll', 'libbz2-1.dll', 'libcrypto-3-x64.dll
         'libtesseract-5.dll', 'libtiff-6.dll', 'libwebp-7.dll', 'libwebpmux-3.dll',
         'libwinpthread-1.dll', 'libzstd.dll', 'zlib1.dll'
 Copy-Item "$tess\tesseract.exe" $t
-foreach ($d in $dlls) { Copy-Item "$tess\$d" $t }
+# lista enxuta das bibliotecas usadas pelo OCR; versoes novas do Tesseract podem mudar nomes
+foreach ($d in $dlls) {
+    if (Test-Path "$tess\$d") { Copy-Item "$tess\$d" $t } else { Write-Host "    (nao encontrada: $d)" }
+}
 Copy-Item "$tess\tessdata\eng.traineddata", "$tess\tessdata\por.traineddata" "$t\tessdata"
 foreach ($c in 'configs', 'tessconfigs') {
     if (Test-Path "$tess\tessdata\$c") { Copy-Item -Recurse "$tess\tessdata\$c" "$t\tessdata\$c" }
 }
+$ErrorActionPreference = 'Continue'
 $teste = & "$t\tesseract.exe" --list-langs 2>&1 | Out-String
+if ($teste -notmatch 'por') {
+    Write-Host "    A lista enxuta nao bastou; copiando todas as bibliotecas do Tesseract."
+    Copy-Item "$tess\*.dll" $t
+    $teste = & "$t\tesseract.exe" --list-langs 2>&1 | Out-String
+}
+$ErrorActionPreference = 'Stop'
 if ($teste -notmatch 'por') { throw "Tesseract copiado nao funcionou: $teste" }
 
 Write-Host "3/4 Reunindo licencas..."
