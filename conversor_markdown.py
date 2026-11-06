@@ -16,6 +16,7 @@ OCR (Tesseract) para imagens e para paginas de PDF escaneadas.
 Uso:
   Janela:        pythonw conversor_markdown.py
   Linha de cmd:  python conversor_markdown.py ORIGEM [ORIGEM...] --saida=PASTA [--sem-ocr] [--sem-subpastas] [--sobrescrever]
+                 [--anonimizar]   (troca dados pessoais SEM revisão manual; prefira a janela)
   Arrastar arquivos sobre o icone: abre a janela e ja converte
 """
 
@@ -37,7 +38,8 @@ if getattr(sys, "frozen", False):
 else:
     APP_DIR = Path(__file__).resolve().parent
 
-VERSAO = "1.0.0"
+VERSAO = "1.1.0"
+SUFIXO_ANONIMIZADO = "_anonimizado"
 
 # no .exe sem console, stdout/stderr nao existem; evita erro de bibliotecas que imprimem
 if sys.stdout is None:
@@ -449,7 +451,9 @@ def listar_arquivos(entradas, subpastas=True):
 
 
 def converter_lote(entradas, pasta_saida, usar_ocr=True, subpastas=True, sobrescrever=False,
-                   log=print, progresso=None, cancelar=None):
+                   log=print, progresso=None, cancelar=None, anonimizar=False, revisar=None):
+    """Converte o lote. Com anonimizar=True nada é gravado antes da análise e da
+    revisão: revisar(anonimizacao) deve devolver True para salvar (None = sem revisão)."""
     pasta_saida = Path(pasta_saida)
     pasta_saida.mkdir(parents=True, exist_ok=True)
     arquivos = listar_arquivos(entradas, subpastas)
@@ -472,6 +476,7 @@ def converter_lote(entradas, pasta_saida, usar_ocr=True, subpastas=True, sobresc
         log(f"  Ignorado (formato antigo, salve como .docx/.pptx): {f.name}")
 
     usados = set()
+    pendentes = []  # (destino, markdown) quando há anonimização: grava só depois da revisão
     ok = falhas = pulados = 0
     inicio = time.time()
     for idx, (arq, base) in enumerate(validos, start=1):
@@ -485,9 +490,10 @@ def converter_lote(entradas, pasta_saida, usar_ocr=True, subpastas=True, sobresc
         except ValueError:
             rel = Path()
         destino_dir = pasta_saida / rel
-        destino = destino_dir / (arq.stem + ".md")
+        sufixo = SUFIXO_ANONIMIZADO if anonimizar else ""
+        destino = destino_dir / (arq.stem + sufixo + ".md")
         if destino in usados:
-            destino = destino_dir / f"{arq.stem}_{arq.suffix.lstrip('.').lower()}.md"
+            destino = destino_dir / f"{arq.stem}_{arq.suffix.lstrip('.').lower()}{sufixo}.md"
         usados.add(destino)
 
         if destino.exists() and not sobrescrever:
@@ -497,6 +503,9 @@ def converter_lote(entradas, pasta_saida, usar_ocr=True, subpastas=True, sobresc
         log(f"[{idx}/{len(validos)}] {arq.name}")
         try:
             md = CONVERSORES[arq.suffix.lower()](arq, ocr, log)
+            if anonimizar:
+                pendentes.append((destino, md))
+                continue
             destino_dir.mkdir(parents=True, exist_ok=True)
             destino.write_text(md, encoding="utf-8")
             ok += 1
@@ -506,6 +515,11 @@ def converter_lote(entradas, pasta_saida, usar_ocr=True, subpastas=True, sobresc
             with open(pasta_saida / "_erros_conversao.log", "a", encoding="utf-8") as f:
                 f.write(f"\n[{datetime.now():%d/%m/%Y %H:%M}] {arq}\n{traceback.format_exc()}\n")
 
+    if anonimizar and pendentes and not (cancelar and cancelar()):
+        ok += gravar_anonimizados(pendentes, log, revisar)
+    elif anonimizar and pendentes:
+        log("Nada foi salvo: a conversão foi interrompida antes da anonimização.")
+
     if progresso:
         progresso(len(validos), len(validos), "")
     dur = time.time() - inicio
@@ -513,6 +527,36 @@ def converter_lote(entradas, pasta_saida, usar_ocr=True, subpastas=True, sobresc
     if falhas:
         log(f"Detalhes dos erros em: {pasta_saida / '_erros_conversao.log'}")
     return ok, pulados, falhas
+
+
+def gravar_anonimizados(pendentes, log, revisar=None):
+    """Detecta os dados pessoais em todos os textos, pede a revisão e grava.
+
+    Se algo falhar ou a revisão for cancelada, NADA é gravado: nunca sai um .md
+    com dados pessoais quando a anonimização foi pedida."""
+    try:
+        from anonimizacao import VERSAO_MOTOR, Anonimizacao
+        log(f"\nProcurando dados pessoais em {len(pendentes)} arquivo(s) (motor do Anonimizador LGPD {VERSAO_MOTOR})...")
+        anon = Anonimizacao()
+        anon.analisar({str(d): md for d, md in pendentes})
+        for desc, n in anon.resumo():
+            log(f"    {desc}: {n}")
+        if revisar is not None:
+            log("Aguardando a revisão...")
+            if not revisar(anon):
+                log("Revisão cancelada: nenhum arquivo foi salvo.")
+                return 0
+        else:
+            log("Atenção: anonimização sem revisão manual. Confira os arquivos antes de compartilhar.")
+        saidas = [(d, anon.aplicar(md)) for d, md in pendentes]
+    except Exception as e:  # noqa: BLE001
+        log(f"ERRO na anonimização ({e}). Nenhum arquivo foi salvo.")
+        return 0
+    for destino, texto in saidas:
+        destino.parent.mkdir(parents=True, exist_ok=True)
+        destino.write_text(texto, encoding="utf-8")
+    log(f"{len(saidas)} arquivo(s) anonimizado(s) salvos com o sufixo {SUFIXO_ANONIMIZADO}.")
+    return len(saidas)
 
 
 # ----------------------------------------------------------------------------
@@ -554,6 +598,7 @@ def abrir_janela(entradas_iniciais=None):
     sub_var = tk.BooleanVar(value=True)
     sobre_var = tk.BooleanVar(value=False)
     auto_var = tk.BooleanVar(value=True)
+    anon_var = tk.BooleanVar(value=False)
 
     frm = ttk.Frame(raiz, padding=12)
     frm.pack(fill="both", expand=True)
@@ -628,9 +673,11 @@ def abrir_janela(entradas_iniciais=None):
     ttk.Checkbutton(opc, text="Sobrescrever .md existentes", variable=sobre_var).pack(side="left")
     opc2 = ttk.Frame(frm)
     opc2.grid(row=5, column=0, columnspan=4, sticky="w", pady=(0, 10))
+    ttk.Checkbutton(opc2, text="Anonimizar dados pessoais (com revisão antes de salvar)",
+                    variable=anon_var).pack(side="left")
     if tem_dnd:
         ttk.Checkbutton(opc2, text="Converter automaticamente ao soltar arquivos",
-                        variable=auto_var).pack(side="left")
+                        variable=auto_var).pack(side="left", padx=14)
 
     barra = ttk.Progressbar(frm, mode="determinate")
     barra.grid(row=6, column=0, columnspan=4, sticky="ew")
@@ -673,6 +720,17 @@ def abrir_janela(entradas_iniciais=None):
                     barra["maximum"] = max(total, 1)
                     barra["value"] = feito
                     status.configure(text=f"{feito}/{total}  {nome}" if nome else f"{feito}/{total}")
+                elif tipo == "revisar":
+                    # a revisão precisa rodar na linha principal da janela
+                    anon, evento, resposta = dado
+                    try:
+                        from revisao_tk import revisar
+                        resposta["ok"] = revisar(raiz, anon)
+                    except Exception as e:  # noqa: BLE001
+                        escrever(f"ERRO ao abrir a revisão: {e}")
+                        resposta["ok"] = False
+                    finally:
+                        evento.set()
                 elif tipo == "fim":
                     estado["rodando"] = False
                     btn_converter.configure(state="normal")
@@ -700,6 +758,12 @@ def abrir_janela(entradas_iniciais=None):
         caixa.delete("1.0", "end")
         caixa.configure(state="disabled")
 
+        def revisar_na_janela(anon):
+            evento, resposta = threading.Event(), {}
+            fila.put(("revisar", (anon, evento, resposta)))
+            evento.wait()
+            return resposta.get("ok", False)
+
         def tarefa():
             try:
                 r = converter_lote(
@@ -707,7 +771,8 @@ def abrir_janela(entradas_iniciais=None):
                     sobrescrever=sobre_var.get(),
                     log=lambda m: fila.put(("log", m)),
                     progresso=lambda a, b, c: fila.put(("prog", (a, b, c))),
-                    cancelar=lambda: estado["cancelar"])
+                    cancelar=lambda: estado["cancelar"],
+                    anonimizar=anon_var.get(), revisar=revisar_na_janela)
             except Exception as e:  # noqa: BLE001
                 fila.put(("log", f"ERRO GERAL: {e}"))
                 r = (0, 0, 0)
@@ -756,7 +821,8 @@ def main():
         # modo linha de comando: conversor ORIGEM [ORIGEM...] --saida=PASTA
         _, _, falhas = converter_lote(args, saida, usar_ocr="--sem-ocr" not in flags,
                                       subpastas="--sem-subpastas" not in flags,
-                                      sobrescrever="--sobrescrever" in flags)
+                                      sobrescrever="--sobrescrever" in flags,
+                                      anonimizar="--anonimizar" in flags)
         sys.exit(1 if falhas else 0)
     # sem --saida: abre a janela; arquivos passados (ex.: arrastados no icone) ja sao carregados
     abrir_janela([a for a in args if Path(a).exists()])
