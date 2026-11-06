@@ -1,6 +1,6 @@
 # Conversor Markdown
 
-## [Baixar o programa para Windows (.zip, 159 MB)](https://github.com/n-lobato/conversor-markdown/releases/latest/download/Conversor-Markdown-v1.0.0-windows-x64.zip)
+## [Baixar o programa para Windows (.zip, 139 MB)](https://github.com/n-lobato/conversor-markdown/releases/latest/download/Conversor-Markdown-v1.1.0-windows-x64.zip)
 
 > **Atenção:** não use o botão verde **Code > Download ZIP**. Ele baixa só o código-fonte, que não roda sem Python instalado. O programa pronto é o link acima, também disponível na página de [Releases](https://github.com/n-lobato/conversor-markdown/releases/latest).
 
@@ -24,7 +24,7 @@ Muitos conversores online pedem o upload do documento. Para contratos, processos
 
 ## Download
 
-Baixe o arquivo **[Conversor-Markdown-v1.0.0-windows-x64.zip](https://github.com/n-lobato/conversor-markdown/releases/latest/download/Conversor-Markdown-v1.0.0-windows-x64.zip)** na página de **[Releases](https://github.com/n-lobato/conversor-markdown/releases/latest)**. Não confunda com o "Download ZIP" do botão verde Code, que traz apenas o código-fonte.
+Baixe o arquivo **[Conversor-Markdown-v1.1.0-windows-x64.zip](https://github.com/n-lobato/conversor-markdown/releases/latest/download/Conversor-Markdown-v1.1.0-windows-x64.zip)** na página de **[Releases](https://github.com/n-lobato/conversor-markdown/releases/latest)**. Não confunda com o "Download ZIP" do botão verde Code, que traz apenas o código-fonte.
 
 1. Extraia o `.zip` (botão direito > Extrair tudo).
 2. Abra `Conversor Markdown.exe`.
@@ -32,6 +32,16 @@ Baixe o arquivo **[Conversor-Markdown-v1.0.0-windows-x64.zip](https://github.com
 Não precisa instalar Python nem ter permissão de administrador. Funciona no Windows 10 e 11 (64 bits).
 
 Na primeira execução, o Windows pode mostrar o aviso "O Windows protegeu o computador", porque o programa não tem assinatura digital comercial. Clique em **Mais informações** e depois em **Executar assim mesmo**.
+
+### Conferir se o arquivo é o original
+
+A partir da versão 1.1.0, o pacote é gerado pelo GitHub Actions a partir do código deste repositório, e não no computador do autor. Cada versão traz o arquivo `.sha256` com a impressão digital (hash SHA-256) do `.zip`, que também aparece nas notas da versão. Para conferir, abra o PowerShell na pasta do download e rode:
+
+```
+Get-FileHash .\Conversor-Markdown-v1.1.0-windows-x64.zip -Algorithm SHA256
+```
+
+O código mostrado deve ser igual ao publicado. Se for diferente, não use o arquivo.
 
 ## Como usar
 
@@ -104,7 +114,7 @@ Também funciona pela linha de comando:
 powershell -ExecutionPolicy Bypass -File build\build_portatil.ps1 -Versao 1.1.0
 ```
 
-O `.zip` sai na pasta `dist`. O script leva só as partes do Tesseract usadas pelo OCR e junta os textos de licença de todos os componentes.
+Os pacotes publicados em Releases são gerados da mesma forma pelo GitHub Actions (`.github/workflows/versao.yml`). O `.zip` sai na pasta `dist`. O script leva só as partes do Tesseract usadas pelo OCR e junta os textos de licença de todos os componentes.
 
 ### Testes e motor de anonimização
 

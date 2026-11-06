@@ -2,7 +2,7 @@ name: Executável Windows
 
 on:
   push:
-    branches: [main, anonimizacao]
+    branches: [main]
   workflow_dispatch:
     inputs:
       publicar:
