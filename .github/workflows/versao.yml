@@ -26,10 +26,7 @@ jobs:
         run: |
           python -m venv .venv
           .\.venv\Scripts\python.exe -m pip install --upgrade pip
-          .\.venv\Scripts\python.exe -m pip install -r requirements.txt pyinstaller pytest
-
-      - name: Testes
-        run: .\.venv\Scripts\python.exe -m pytest -v
+          .\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
 
       - name: Tesseract (OCR) com português
         shell: pwsh
@@ -41,6 +38,9 @@ jobs:
             Invoke-WebRequest https://github.com/tesseract-ocr/tessdata/raw/main/eng.traineddata -OutFile .\Tesseract-OCR\tessdata\eng.traineddata
           }
           .\Tesseract-OCR\tesseract.exe --version
+
+      - name: Testes (inclui OCR)
+        run: .\.venv\Scripts\python.exe -m pytest -v -rs
 
       - name: Ler a versão
         shell: pwsh

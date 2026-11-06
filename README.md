@@ -105,7 +105,7 @@ Também funciona pela linha de comando:
 
 ## Compilar a versão portátil
 
-1. Crie o ambiente como acima e instale também o PyInstaller: `.\.venv\Scripts\python.exe -m pip install pyinstaller`
+1. Crie o ambiente como acima e instale também as ferramentas de teste e compilação: `.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt`
 2. Coloque o Tesseract na pasta `Tesseract-OCR`, na raiz do projeto. Uma forma de fazer isso sem administrador é extrair o instalador da [UB Mannheim](https://github.com/UB-Mannheim/tesseract/wiki) com o 7-Zip.
 3. Baixe o [`por.traineddata`](https://github.com/tesseract-ocr/tessdata/raw/main/por.traineddata) para `Tesseract-OCR\tessdata`.
 4. Rode:

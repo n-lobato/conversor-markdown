@@ -1,11 +1,14 @@
+# Versões exatas, as mesmas usadas para gerar a versão publicada.
+# O Dependabot propõe atualizações por pull request, e os testes rodam antes.
 pymupdf==2.1
 pymupdf4llm==2.1
 pymupdf_layout==2.1
-mammoth
-markdownify
-python-pptx
-openpyxl
-xlrd
-pytesseract
-pillow
-tkinterdnd2
+onnxruntime==1.31.1
+mammoth==1.13.0
+markdownify==1.2.3
+python-pptx==1.0.2
+openpyxl==3.1.5
+xlrd==2.0.2
+pytesseract==0.3.13
+pillow==13.0.0
+tkinterdnd2==0.7.0
