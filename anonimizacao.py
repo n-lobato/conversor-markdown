@@ -33,7 +33,8 @@ class Anonimizacao:
         """textos: {identificador (ex.: caminho de saída): conteúdo em Markdown}."""
         self.textos = dict(textos)
         for chave, texto in self.textos.items():
-            for achado in self.detector.detectar(texto):
+            # o Markdown de PDF e OCR vem em linhas fisicas: junta as quebras do paragrafo
+            for achado in self.detector.detectar(texto, juntar_linhas=True):
                 self.registro.registrar(achado, chave)
         self.atualizar()
 

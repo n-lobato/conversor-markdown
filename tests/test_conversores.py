@@ -216,3 +216,47 @@ def test_mesmo_nome_com_extensoes_diferentes_nao_se_sobrescrevem(tmp_path):
     ok, _, falhas = cm.converter_lote([origem], saida, usar_ocr=False, log=lambda m: None)
     assert (ok, falhas) == (2, 0)
     assert sorted(p.name for p in saida.glob("*.md")) == ["dados.md", "dados_xlsx.md"]
+
+
+# ------------------------------------------------------------------ cabeçalhos repetidos
+def test_remove_so_cabecalhos_e_rodapes_que_se_repetem():
+    paginas = [
+        f"TRIBUNAL DE JUSTIÇA DO DISTRITO FEDERAL\nProcesso 0701234-93\n\n{corpo}\n\nPágina {n} de 4"
+        for n, corpo in enumerate(["# SENTENÇA\n\nRelatório do caso.", "Fundamentação longa.",
+                                   "Mais fundamentação.", "Dispositivo. Publique-se."], start=1)]
+    saida = cm.remover_cabecalhos_repetidos(paginas)
+    assert saida[0].startswith("# SENTENÇA")
+    assert all("TRIBUNAL DE JUSTIÇA" not in p and "Página" not in p for p in saida)
+    assert "Dispositivo. Publique-se." in saida[3]
+
+
+def test_documento_curto_fica_intacto():
+    paginas = ["ATA DA REUNIÃO\n\nTexto.", "ATA DA REUNIÃO\n\nMais texto."]
+    assert cm.remover_cabecalhos_repetidos(paginas) == paginas
+
+
+def test_linha_repetida_no_meio_da_pagina_nao_e_removida():
+    paginas = [f"Título {n}\n\nL1\nL2\nL3\nL4\nItem aprovado por unanimidade.\nL5\nL6\nL7\nL8\nFim {n}"
+               for n in range(1, 6)]
+    saida = cm.remover_cabecalhos_repetidos(paginas)
+    assert all("Item aprovado por unanimidade." in p for p in saida)
+
+
+def test_pdf_mantem_o_titulo_no_topo_da_pagina(tmp_path):
+    pymupdf = pytest.importorskip("pymupdf")
+    doc = pymupdf.open()
+    for n in range(1, 5):
+        p = doc.new_page()
+        p.insert_text((72, 40), "TRIBUNAL DE JUSTIÇA DO DISTRITO FEDERAL", fontsize=9)
+        if n == 1:
+            p.insert_text((72, 72), "EXCELENTÍSSIMO SENHOR JUIZ DE DIREITO", fontsize=14)
+        corpo = ["Dos fatos narrados pela autora.", "Do direito aplicável ao caso.",
+                 "Da tutela de urgência requerida.", "Dos pedidos finais e do valor da causa."][n - 1]
+        p.insert_text((72, 200), corpo, fontsize=11)
+        p.insert_text((72, 810), f"Página {n} de 4", fontsize=9)
+    f = tmp_path / "peticao.pdf"
+    doc.save(f)
+    md = cm.converter_pdf(f, None, print)
+    assert "EXCELENTÍSSIMO SENHOR JUIZ DE DIREITO" in md
+    assert "Dos fatos narrados pela autora." in md and "Dos pedidos finais e do valor da causa." in md
+    assert "TRIBUNAL DE JUSTIÇA" not in md and "de 4" not in md

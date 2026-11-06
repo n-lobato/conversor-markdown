@@ -38,7 +38,7 @@ if getattr(sys, "frozen", False):
 else:
     APP_DIR = Path(__file__).resolve().parent
 
-VERSAO = "1.1.0"
+VERSAO = "1.1.1"
 SUFIXO_ANONIMIZADO = "_anonimizado"
 
 # no .exe sem console, stdout/stderr nao existem; evita erro de bibliotecas que imprimem
@@ -176,6 +176,40 @@ def tabela_md(linhas):
 # Conversores
 # ----------------------------------------------------------------------------
 
+def remover_cabecalhos_repetidos(paginas, linhas_borda=4, minimo_paginas=3, proporcao=0.6):
+    """Remove cabecalhos e rodapes que se repetem nas paginas (nome do orgao,
+    "Pagina 3 de 10"). So olha as primeiras e as ultimas linhas de cada pagina e
+    so remove o que aparece em pelo menos 60% delas (e em 3 ou mais). Numeros sao
+    ignorados na comparacao, para pegar a numeracao de paginas."""
+    import math
+    import re
+    if len(paginas) < minimo_paginas:
+        return paginas
+
+    def chave(linha):
+        return re.sub(r"\d+", "#", re.sub(r"[\s*_#>|]+", " ", linha).strip().lower())
+
+    linhas_por_pagina = [(p or "").split("\n") for p in paginas]
+    bordas = []
+    for linhas in linhas_por_pagina:
+        uteis = [i for i, l in enumerate(linhas) if l.strip()]
+        bordas.append(set(uteis[:linhas_borda] + uteis[-linhas_borda:]))
+    contagem = {}
+    for linhas, idx in zip(linhas_por_pagina, bordas):
+        for k in {chave(linhas[i]) for i in idx}:
+            if len(k.replace("#", "").strip()) >= 3:
+                contagem[k] = contagem.get(k, 0) + 1
+    limiar = max(minimo_paginas, math.ceil(proporcao * len(paginas)))
+    repetidas = {k for k, n in contagem.items() if n >= limiar}
+    if not repetidas:
+        return paginas
+    saida = []
+    for linhas, idx in zip(linhas_por_pagina, bordas):
+        mantidas = [l for i, l in enumerate(linhas) if not (i in idx and chave(l) in repetidas)]
+        saida.append("\n".join(mantidas).strip())
+    return saida
+
+
 def converter_pdf(caminho, ocr, log):
     import pymupdf
     doc = pymupdf.open(str(caminho))
@@ -186,8 +220,11 @@ def converter_pdf(caminho, ocr, log):
     paginas_md = None
     try:
         import pymupdf4llm
+        # header/footer=False faria a biblioteca descartar TODO texto do topo e do rodape
+        # de cada pagina (inclusive o titulo de um documento de uma pagina so). O texto e
+        # mantido, e so as linhas repetidas em quase todas as paginas sao removidas depois.
         chunks = pymupdf4llm.to_markdown(doc, page_chunks=True, use_ocr=False,
-                                         header=False, footer=False, show_progress=False)
+                                         header=True, footer=True, show_progress=False)
         paginas_md = [c.get("text", "") for c in chunks]
         if len(paginas_md) != total:
             paginas_md = None
@@ -203,6 +240,7 @@ def converter_pdf(caminho, ocr, log):
 
     if paginas_md is None:
         paginas_md = [doc[i].get_text("text") for i in range(total)]
+    paginas_md = remover_cabecalhos_repetidos(paginas_md)
 
     from PIL import Image
     partes, ocr_feitas, sem_texto = [], 0, 0

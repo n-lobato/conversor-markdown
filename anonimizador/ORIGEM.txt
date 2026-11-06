@@ -1,7 +1,7 @@
 Motor de detecção copiado do Anonimizador LGPD
 https://github.com/n-lobato/anonimizador-lgpd (licença GPL-3.0)
 Versão: 1.1.0
-Referência: v1.1.0
+Referência: v1.1.0-2-g09bcc21
 
 Não edite estes arquivos aqui. Corrija no anonimizador e rode
 python build/atualizar_motor.py CAMINHO_DO_ANONIMIZADOR
