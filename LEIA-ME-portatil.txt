@@ -39,6 +39,13 @@ OPÇÕES
   de Word e PowerPoint (português e inglês). Deixa a conversão mais lenta.
 - Incluir subpastas: percorre todas as pastas internas da origem.
 - Sobrescrever .md existentes: se desmarcado, arquivos já convertidos são pulados.
+- Anonimizar dados pessoais: troca nomes, CPF, endereços e outros dados por
+  códigos ([PESSOA_1], [CPF_1]...) antes de salvar. Antes de gravar, abre uma
+  tela de revisão: desmarque o que não for dado pessoal e inclua o que faltou.
+  Os arquivos saem com o sufixo "_anonimizado". Se a revisão for cancelada,
+  nada é salvo. Atenção: nenhum programa encontra tudo (cerca de 1 em cada
+  10 nomes passa sem ser detectado) e os nomes dos arquivos não são trocados.
+  Confira o resultado antes de compartilhar.
 
 LIMITAÇÕES
 - Arquivos antigos .doc e .ppt não são convertidos. Abra no Office e salve

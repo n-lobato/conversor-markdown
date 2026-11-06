@@ -20,6 +20,7 @@ Muitos conversores online pedem o upload do documento. Para contratos, processos
 - **OCR em português e inglês** para imagens, PDFs escaneados e figuras dentro de Word e PowerPoint.
 - Preserva títulos, listas, negrito, tabelas e notas do apresentador.
 - Se um arquivo falhar, os outros continuam. Os erros ficam registrados num log.
+- **Anonimização opcional:** troca nomes, CPF, endereços e outros dados pessoais por códigos antes de salvar, com uma tela de revisão. Veja abaixo.
 
 ## Download
 
@@ -44,6 +45,28 @@ Opções:
 - **Incluir subpastas.**
 - **Sobrescrever .md existentes:** se desmarcado, arquivos já convertidos são pulados.
 - **Converter automaticamente ao soltar arquivos.**
+- **Anonimizar dados pessoais:** veja a seção seguinte.
+
+## Anonimizar antes de usar com IA
+
+Converter no próprio computador evita o upload do arquivo original, mas o Markdown gerado continua com todos os dados pessoais. Se ele for colado numa ferramenta de IA na nuvem, o problema volta. Para isso existe a opção **Anonimizar dados pessoais (com revisão antes de salvar)**.
+
+Com ela marcada:
+
+1. Os arquivos são convertidos, mas **nada é gravado ainda**.
+2. O programa procura nomes, CPF, RG, CNH, OAB, endereços, telefones, e-mails, contas bancárias, datas de nascimento e outros dados, usando o mesmo motor do [Anonimizador LGPD](https://github.com/n-lobato/anonimizador-lgpd).
+3. Abre uma tela de revisão com tudo o que foi encontrado e o trecho onde aparece. Desmarque o que não for dado pessoal, inclua o que faltou e una linhas que forem a mesma pessoa.
+4. Ao clicar em **Salvar anonimizado**, os arquivos são gravados com o sufixo `_anonimizado`, e cada dado vira um código: `[PESSOA_1]`, `[CPF_1]`, `[ENDERECO_1]`. A mesma pessoa recebe o mesmo código em todos os arquivos do lote.
+
+Se a revisão for cancelada ou algo der errado na anonimização, **nenhum arquivo é salvo**. Assim não sai, por engano, um Markdown com dados pessoais quando a anonimização foi pedida.
+
+Leve a sério a revisão. Na medição publicada no Anonimizador LGPD, **cerca de 1 em cada 10 nomes passou sem ser detectado** em textos que o programa não conhecia. Além disso:
+
+- trocar nomes e números não basta se o contexto (cargo, local, datas, fatos) ainda permitir saber quem é a pessoa;
+- os **nomes dos arquivos** não são alterados. Se o nome do arquivo tiver o nome de alguém, renomeie antes;
+- não é gerada tabela de correspondência entre códigos e dados originais. Para isso, ou para anonimizar Word e PDF mantendo o formato original, use o Anonimizador LGPD.
+
+Pela linha de comando, `--anonimizar` faz a troca **sem revisão manual** e mostra um aviso. Use só quando for conferir os arquivos depois.
 
 ## Limitações
 
@@ -67,7 +90,7 @@ O programa procura o Tesseract na pasta `Tesseract-OCR` ao lado do script ou na 
 Também funciona pela linha de comando:
 
 ```powershell
-.\.venv\Scripts\python.exe conversor_markdown.py "C:\pasta\origem" --saida="C:\pasta\saida" [--sem-ocr] [--sem-subpastas] [--sobrescrever]
+.\.venv\Scripts\python.exe conversor_markdown.py "C:\pasta\origem" --saida="C:\pasta\saida" [--sem-ocr] [--sem-subpastas] [--sobrescrever] [--anonimizar]
 ```
 
 ## Compilar a versão portátil
@@ -78,16 +101,28 @@ Também funciona pela linha de comando:
 4. Rode:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File build\build_portatil.ps1 -Versao 1.0.0
+powershell -ExecutionPolicy Bypass -File build\build_portatil.ps1 -Versao 1.1.0
 ```
 
 O `.zip` sai na pasta `dist`. O script leva só as partes do Tesseract usadas pelo OCR e junta os textos de licença de todos os componentes.
+
+### Testes e motor de anonimização
+
+`python -m pytest` roda os testes, que também rodam no GitHub Actions (Windows e Linux) a cada envio.
+
+A pasta `anonimizador/` é uma cópia do motor de detecção do [Anonimizador LGPD](https://github.com/n-lobato/anonimizador-lgpd). Não edite lá: corrija no anonimizador e traga a nova versão com `python build/atualizar_motor.py CAMINHO_DO_ANONIMIZADOR`.
 
 ## Licença
 
 Este projeto é software livre sob a **GNU Affero General Public License v3.0** (arquivo [`LICENSE`](LICENSE)). Você pode usar, estudar, modificar e redistribuir, desde que mantenha a mesma licença e disponibilize o código-fonte.
 
 A licença AGPL foi escolhida porque o projeto usa o [PyMuPDF](https://github.com/pymupdf/PyMuPDF), distribuído pela Artifex sob AGPL-3.0 ou licença comercial. Os demais componentes e suas licenças estão em [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md).
+
+O motor de anonimização (pasta `anonimizador/`) vem do Anonimizador LGPD, do mesmo autor, sob GPL-3.0, que pode ser combinada com a AGPL-3.0 (seção 13 de ambas as licenças).
+
+## Sobre o uso de inteligência artificial
+
+O desenvolvimento contou com o Claude, assistente de IA da Anthropic, na escrita do código, dos testes e desta documentação. As escolhas sobre como o programa funciona foram feitas pelo autor. O código é aberto para que qualquer pessoa possa conferir o que ele faz.
 
 ## Autor
 

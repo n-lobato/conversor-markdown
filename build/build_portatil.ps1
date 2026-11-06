@@ -23,6 +23,7 @@ $ErrorActionPreference = 'Continue'   # PyInstaller escreve avisos no stderr
     --workpath "$tmp\work" --distpath "$tmp\dist" --specpath "$tmp\work" `
     --collect-all pymupdf --collect-all pymupdf4llm --collect-all onnxruntime --collect-all tkinterdnd2 `
     --hidden-import pytesseract --hidden-import xlrd --hidden-import mammoth --hidden-import markdownify `
+    --hidden-import anonimizacao --hidden-import revisao_tk --collect-submodules anonimizador `
     --log-level WARN conversor_markdown.py
 $ErrorActionPreference = 'Stop'
 if ($LASTEXITCODE -ne 0) { throw "PyInstaller falhou." }
@@ -52,6 +53,7 @@ $lic = "$app\LICENCAS"
 New-Item -ItemType Directory -Force "$lic\Tesseract", "$lic\Python-e-TclTk" | Out-Null
 Copy-Item LICENSE "$lic\LICENSE-Conversor-Markdown-AGPL-3.0.txt"
 Copy-Item THIRD-PARTY-NOTICES.md $lic
+Copy-Item anonimizador\LICENSE-GPL-3.0.txt "$lic\LICENSE-motor-Anonimizador-LGPD-GPL-3.0.txt"
 Copy-Item "$tess\doc\LICENSE" "$lic\Tesseract\LICENSE.txt"
 if (Test-Path "$tess\doc\AUTHORS") { Copy-Item "$tess\doc\AUTHORS" "$lic\Tesseract\AUTHORS.txt" }
 $base = (& $py -c "import sys; print(sys.base_prefix)").Trim()

@@ -36,6 +36,8 @@ def main() -> int:
     for rel in ARQUIVOS:
         (destino / rel).parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(origem / rel, destino / rel)
+    if (origem_repo / "LICENSE").exists():
+        shutil.copy2(origem_repo / "LICENSE", destino / "LICENSE-GPL-3.0.txt")
     try:
         commit = subprocess.run(["git", "-C", str(origem_repo), "describe", "--tags", "--always"],
                                 capture_output=True, text=True, check=True).stdout.strip()

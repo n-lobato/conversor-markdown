@@ -1,0 +1,103 @@
+name: Executável Windows
+
+on:
+  push:
+    branches: [main, anonimizacao]
+  workflow_dispatch:
+    inputs:
+      publicar:
+        description: "Publicar em Releases a versão indicada em conversor_markdown.py (só no ramo main)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Ambiente Python (.venv)
+        run: |
+          python -m venv .venv
+          .\.venv\Scripts\python.exe -m pip install --upgrade pip
+          .\.venv\Scripts\python.exe -m pip install -r requirements.txt pyinstaller pytest
+
+      - name: Testes
+        run: .\.venv\Scripts\python.exe -m pytest -v
+
+      - name: Tesseract (OCR) com português
+        shell: pwsh
+        run: |
+          choco install tesseract -y --no-progress
+          Copy-Item -Recurse "C:\Program Files\Tesseract-OCR" .\Tesseract-OCR
+          Invoke-WebRequest https://github.com/tesseract-ocr/tessdata/raw/main/por.traineddata -OutFile .\Tesseract-OCR\tessdata\por.traineddata
+          if (-not (Test-Path .\Tesseract-OCR\tessdata\eng.traineddata)) {
+            Invoke-WebRequest https://github.com/tesseract-ocr/tessdata/raw/main/eng.traineddata -OutFile .\Tesseract-OCR\tessdata\eng.traineddata
+          }
+          .\Tesseract-OCR\tesseract.exe --version
+
+      - name: Ler a versão
+        shell: pwsh
+        run: |
+          $v = (Select-String -Path conversor_markdown.py -Pattern '^VERSAO = "(.+)"').Matches[0].Groups[1].Value
+          "VERSAO=$v" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
+          Write-Output "Versão: $v"
+
+      - name: Gerar o pacote portátil
+        shell: pwsh
+        run: powershell -ExecutionPolicy Bypass -File build\build_portatil.ps1 -Versao $env:VERSAO
+
+      - name: Testar o executável (conversão e anonimização pela linha de comando)
+        shell: pwsh
+        run: |
+          $zip = "dist\Conversor-Markdown-v$env:VERSAO-windows-x64.zip"
+          Expand-Archive $zip -DestinationPath teste_exe
+          New-Item -ItemType Directory -Force amostra | Out-Null
+          "Nome;CPF`nMaria Aparecida de Souza;529.982.247-25" | Out-File -Encoding utf8 amostra\lista.csv
+          $exe = "teste_exe\Conversor Markdown\Conversor Markdown.exe"
+          Start-Process -Wait -FilePath $exe -ArgumentList '"amostra"', '--saida=saida_teste', '--sem-ocr'
+          Start-Process -Wait -FilePath $exe -ArgumentList '"amostra"', '--saida=saida_anon', '--sem-ocr', '--anonimizar'
+          $normal = Get-Content saida_teste\lista.md -Raw
+          $anon = Get-Content saida_anon\lista_anonimizado.md -Raw
+          Write-Output $normal $anon
+          if ($normal -notmatch "529.982") { throw "Conversão normal falhou" }
+          if ($anon -match "529.982" -or $anon -match "Maria") { throw "Anonimização falhou" }
+
+      - name: Calcular SHA-256
+        shell: pwsh
+        run: |
+          $nome = "Conversor-Markdown-v$env:VERSAO-windows-x64.zip"
+          $h = (Get-FileHash "dist\$nome" -Algorithm SHA256).Hash.ToLower()
+          "$h  $nome" | Out-File -Encoding ascii -NoNewline "dist\$nome.sha256"
+          "SHA256=$h" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
+          "PACOTE=$nome" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
+          Write-Output "SHA-256: $h"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Conversor-Markdown-windows
+          path: dist/*
+
+      - name: Publicar release
+        if: github.event_name == 'workflow_dispatch' && inputs.publicar && github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ format('v{0}', env.VERSAO) }}
+          name: ${{ format('Conversor Markdown {0}', env.VERSAO) }}
+          target_commitish: ${{ github.sha }}
+          files: |
+            dist/${{ env.PACOTE }}
+            dist/${{ env.PACOTE }}.sha256
+          body: |
+            **SHA-256 do pacote:** `${{ env.SHA256 }}`
+
+            Para conferir no Windows: `Get-FileHash .\${{ env.PACOTE }} -Algorithm SHA256`
+
+            Gerado pelo GitHub Actions a partir do código deste repositório.
+          generate_release_notes: true

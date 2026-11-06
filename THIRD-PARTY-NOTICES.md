@@ -19,6 +19,11 @@ licenças acompanham a versão portátil, na pasta `LICENCAS`.
 | [tkinterdnd2](https://github.com/Eliav2/tkinterdnd2) (inclui tkdnd) | Arrastar e soltar | MIT |
 | [ONNX Runtime](https://github.com/microsoft/onnxruntime) | Análise de layout do PyMuPDF | MIT |
 
+O motor de anonimização (pasta `anonimizador/`) vem do
+[Anonimizador LGPD](https://github.com/n-lobato/anonimizador-lgpd), do mesmo autor,
+sob GPL-3.0 (texto em `anonimizador/LICENSE-GPL-3.0.txt`). A GPL-3.0 e a AGPL-3.0
+podem ser combinadas, conforme a seção 13 de cada uma.
+
 A lista completa, com versões, é gerada automaticamente no build
 (`LICENCAS/python/_INDICE.md` na versão portátil).
 
