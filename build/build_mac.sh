@@ -43,6 +43,9 @@ codesign --force -s - "$TESS"/libs/*.dylib "$TESS/tesseract"
 # versão mínima do macOS exigida pelo Tesseract e pelas bibliotecas (a maior vale para o pacote)
 MINIMO=$(for f in "$TESS/tesseract" "$TESS"/libs/*.dylib; do vtool -show-build "$f" 2>/dev/null | awk '/minos/{print $2}'; done | sort -V | tail -1)
 echo "    macOS mínimo do OCR incluído: $MINIMO"
+for f in "$TESS/tesseract" "$TESS"/libs/*.dylib; do echo "      $(vtool -show-build "$f" 2>/dev/null | awk '/minos/{print $2}')  $(basename "$f")"; done
+echo "    Python e bibliotecas do aplicativo:"
+find "$APP/Contents" \( -name '*.dylib' -o -name '*.so' -o -name 'Python' \) -type f | while read -r f; do vtool -show-build "$f" 2>/dev/null | awk -v n="$(basename "$f")" '/minos/{print "      " $2 "  " n}'; done | sort -V | tail -5
 echo "$MINIMO" > "$TMP/minimo.txt"
 "$TESS/tesseract" --tessdata-dir "$DADOS" --list-langs | grep -q por || { echo "ERRO: Tesseract copiado não funcionou"; exit 1; }
 
