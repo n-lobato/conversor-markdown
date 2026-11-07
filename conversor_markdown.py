@@ -115,10 +115,11 @@ class OCR:
             return
         pytesseract.pytesseract.tesseract_cmd = str(exe)
 
-        # o Tesseract que vem com o programa usa os idiomas da pasta dele
+        # o Tesseract que vem com o programa usa os idiomas da pasta dele. Vai por variável de
+        # ambiente, e não por --tessdata-dir, porque no Windows as aspas do caminho chegam literais
         for pasta in (exe.parent / "tessdata", APP_DIR.parent / "Resources" / "tessdata", TESSDATA_DIR):
             if (pasta / "por.traineddata").is_file():
-                self.config = f'--tessdata-dir "{pasta}"'
+                os.environ["TESSDATA_PREFIX"] = str(pasta)
                 break
         try:
             idiomas = set(pytesseract.get_languages(config=self.config))
