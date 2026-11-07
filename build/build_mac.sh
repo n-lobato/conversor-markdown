@@ -40,6 +40,10 @@ for l in eng por; do curl -fsSL -o "$DADOS/$l.traineddata" "$TESSDATA_URL/$l.tra
 cp -R "$(brew --prefix tesseract)/share/tessdata/configs" "$DADOS/" 2>/dev/null || true
 cp -R "$(brew --prefix tesseract)/share/tessdata/tessconfigs" "$DADOS/" 2>/dev/null || true
 codesign --force -s - "$TESS"/libs/*.dylib "$TESS/tesseract"
+# versão mínima do macOS exigida pelo Tesseract e pelas bibliotecas (a maior vale para o pacote)
+MINIMO=$(for f in "$TESS/tesseract" "$TESS"/libs/*.dylib; do vtool -show-build "$f" 2>/dev/null | awk '/minos/{print $2}'; done | sort -V | tail -1)
+echo "    macOS mínimo do OCR incluído: $MINIMO"
+echo "$MINIMO" > "$TMP/minimo.txt"
 "$TESS/tesseract" --tessdata-dir "$DADOS" --list-langs | grep -q por || { echo "ERRO: Tesseract copiado não funcionou"; exit 1; }
 
 echo "3/6 Reunindo licenças..."
@@ -62,6 +66,7 @@ echo "4/6 Ajustando o Info.plist (versão e arrastar arquivos para o ícone)..."
 PL="$APP/Contents/Info.plist"
 plutil -replace CFBundleShortVersionString -string "$VERSAO" "$PL"
 plutil -replace CFBundleVersion -string "$VERSAO" "$PL"
+plutil -replace LSMinimumSystemVersion -string "$(cat "$TMP/minimo.txt")" "$PL"
 plutil -replace CFBundleDisplayName -string "Conversor Markdown" "$PL"
 plutil -replace NSHumanReadableCopyright -string "© 2026 n-lobato. Software livre (GNU AGPL v3)." "$PL"
 plutil -replace CFBundleDocumentTypes -json \
