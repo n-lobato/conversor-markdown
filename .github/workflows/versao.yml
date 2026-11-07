@@ -92,8 +92,8 @@ jobs:
             dist/*-instalador.exe
 
   mac:
-    # macOS 14: as bibliotecas do Homebrew compiladas aqui rodam do macOS 14 em diante
-    runs-on: macos-14
+    # macOS 15: as bibliotecas do Homebrew compiladas aqui rodam do macOS 15 em diante
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
