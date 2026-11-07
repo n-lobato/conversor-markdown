@@ -23,7 +23,7 @@ $ErrorActionPreference = 'Continue'   # PyInstaller escreve avisos no stderr
     --workpath "$tmp\work" --distpath "$tmp\dist" --specpath "$tmp\work" `
     --collect-all pymupdf --collect-all pymupdf4llm --collect-all onnxruntime --collect-all tkinterdnd2 `
     --hidden-import pytesseract --hidden-import xlrd --hidden-import mammoth --hidden-import markdownify `
-    --hidden-import anonimizacao --hidden-import revisao_tk --collect-submodules anonimizador `
+    --hidden-import anonimizacao --hidden-import revisao_tk --hidden-import preferencias --collect-submodules anonimizador `
     --log-level WARN conversor_markdown.py
 $ErrorActionPreference = 'Stop'
 if ($LASTEXITCODE -ne 0) { throw "PyInstaller falhou." }

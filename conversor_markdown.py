@@ -38,7 +38,7 @@ if getattr(sys, "frozen", False):
 else:
     APP_DIR = Path(__file__).resolve().parent
 
-VERSAO = "1.1.1"
+VERSAO = "1.2.0"
 SUFIXO_ANONIMIZADO = "_anonimizado"
 
 # no .exe sem console, stdout/stderr nao existem; evita erro de bibliotecas que imprimem
@@ -630,13 +630,23 @@ def abrir_janela(entradas_iniciais=None):
     fila = queue.Queue()
     estado = {"rodando": False, "cancelar": False, "arquivos": [], "saida_auto": None}
 
+    import preferencias
+
+    prefs = preferencias.carregar()
     entrada_var = tk.StringVar()
     saida_var = tk.StringVar()
-    ocr_var = tk.BooleanVar(value=True)
-    sub_var = tk.BooleanVar(value=True)
-    sobre_var = tk.BooleanVar(value=False)
-    auto_var = tk.BooleanVar(value=True)
-    anon_var = tk.BooleanVar(value=False)
+    ocr_var = tk.BooleanVar(value=prefs["ocr"])
+    sub_var = tk.BooleanVar(value=prefs["subpastas"])
+    sobre_var = tk.BooleanVar(value=False)  # nunca é lembrada (ver preferencias.py)
+    auto_var = tk.BooleanVar(value=prefs["auto"])
+    anon_var = tk.BooleanVar(value=prefs["anonimizar"])
+    opcoes_lembradas = {"ocr": ocr_var, "subpastas": sub_var, "auto": auto_var, "anonimizar": anon_var}
+
+    def guardar_opcoes(*_):
+        preferencias.salvar({k: v.get() for k, v in opcoes_lembradas.items()})
+
+    for var in opcoes_lembradas.values():
+        var.trace_add("write", guardar_opcoes)
 
     frm = ttk.Frame(raiz, padding=12)
     frm.pack(fill="both", expand=True)
@@ -801,6 +811,9 @@ def abrir_janela(entradas_iniciais=None):
             fila.put(("revisar", (anon, evento, resposta)))
             evento.wait()
             return resposta.get("ok", False)
+
+        if not anon_var.get():
+            escrever("Anonimização desligada: os .md vão sair com os dados pessoais dos originais.")
 
         def tarefa():
             try:
