@@ -1,10 +1,20 @@
 # Conversor Markdown
 
-## [Baixar o programa para Windows (.zip, 139 MB)](https://github.com/n-lobato/conversor-markdown/releases/latest/download/Conversor-Markdown-v1.2.0-windows-x64.zip)
+## Baixar
 
-> **Atenção:** não use o botão verde **Code > Download ZIP**. Ele baixa só o código-fonte, que não roda sem Python instalado. O programa pronto é o link acima, também disponível na página de [Releases](https://github.com/n-lobato/conversor-markdown/releases/latest).
+| Sistema | Arquivo |
+| --- | --- |
+| **Windows 10 e 11** (recomendado) | [Instalador](https://github.com/n-lobato/conversor-markdown/releases/latest/download/Conversor-Markdown-v1.3.0-windows-x64-instalador.exe) |
+| Windows, versão portátil (pen drive) | [.zip](https://github.com/n-lobato/conversor-markdown/releases/latest/download/Conversor-Markdown-v1.3.0-windows-x64.zip) |
+| **Mac** com chip Apple (M1 ou mais novo) | [.dmg](https://github.com/n-lobato/conversor-markdown/releases/latest/download/Conversor-Markdown-v1.3.0-mac-apple-silicon.dmg) |
+| **Linux** Ubuntu, Debian, Mint | [.deb](https://github.com/n-lobato/conversor-markdown/releases/latest/download/conversor-markdown_1.3.0_amd64.deb) |
+| Outras distribuições Linux | [.tar.gz](https://github.com/n-lobato/conversor-markdown/releases/latest/download/Conversor-Markdown-v1.3.0-linux-x64.tar.gz) |
 
-Programa para Windows que converte PDF, Word, PowerPoint, Excel, CSV e imagens em Markdown, em lote, **sem enviar nada para a internet**. Tudo roda no próprio computador, inclusive o OCR.
+Todos os arquivos também estão na página de [Releases](https://github.com/n-lobato/conversor-markdown/releases/latest). Como instalar em cada sistema está na seção [Instalar](#instalar).
+
+> **Atenção:** não use o botão verde **Code > Download ZIP**. Ele baixa só o código-fonte, que não roda sem Python instalado.
+
+Programa para Windows, Mac e Linux que converte PDF, Word, PowerPoint, Excel, CSV e imagens em Markdown, em lote, **sem enviar nada para a internet**. Tudo roda no próprio computador, inclusive o OCR.
 
 Feito para quem precisa preparar documentos para ferramentas de IA, bases de conhecimento ou anotações, mas não quer (ou não pode) subir arquivos para serviços online.
 
@@ -20,26 +30,43 @@ Muitos conversores online pedem o upload do documento. Para contratos, processos
 - **OCR em português e inglês** para imagens, PDFs escaneados e figuras dentro de Word e PowerPoint.
 - Preserva títulos, listas, negrito, tabelas e notas do apresentador.
 - Se um arquivo falhar, os outros continuam. Os erros ficam registrados num log.
-- **Anonimização opcional:** troca nomes, CPF, endereços e outros dados pessoais por códigos antes de salvar, com uma tela de revisão. Veja abaixo.
+- **Anonimização (vem ligada):** troca nomes, CPF, endereços e outros dados pessoais por códigos antes de salvar, com uma tela de revisão. Veja abaixo.
 
-## Download
+## Instalar
 
-Baixe o arquivo **[Conversor-Markdown-v1.2.0-windows-x64.zip](https://github.com/n-lobato/conversor-markdown/releases/latest/download/Conversor-Markdown-v1.2.0-windows-x64.zip)** na página de **[Releases](https://github.com/n-lobato/conversor-markdown/releases/latest)**. Não confunda com o "Download ZIP" do botão verde Code, que traz apenas o código-fonte.
+### Windows
 
-1. Extraia o `.zip` (botão direito > Extrair tudo).
-2. Abra `Conversor Markdown.exe`.
+**Instalador (recomendado).** Baixe o `Conversor-Markdown-v1.3.0-windows-x64-instalador.exe` e abra. Ele instala só para o seu usuário, sem pedir senha de administrador, cria o atalho no menu Iniciar (e, se quiser, na Área de Trabalho) e aparece em **Configurações > Aplicativos > Aplicativos instalados**. É por lá que se desinstala. Para atualizar, basta rodar o instalador da versão nova.
 
-Não precisa instalar Python nem ter permissão de administrador. Funciona no Windows 10 e 11 (64 bits).
+**Versão portátil.** Baixe o `.zip`, clique com o botão direito em **Extrair tudo** e abra `Conversor Markdown.exe` dentro da pasta extraída. Não instala nada, então serve para levar num pen drive. Para remover, apague a pasta.
 
-Na primeira execução, o Windows pode mostrar o aviso "O Windows protegeu o computador", porque o programa não tem assinatura digital comercial. Clique em **Mais informações** e depois em **Executar assim mesmo**.
+Funciona no Windows 10 e 11 (64 bits), com o OCR já incluído. Na primeira vez, o Windows pode mostrar o aviso "O Windows protegeu o computador", porque o programa não tem assinatura digital comercial. Clique em **Mais informações** e depois em **Executar assim mesmo**.
+
+### Mac
+
+Para Macs com chip Apple (M1, M2, M3, M4 ou mais novos), com o OCR já incluído. Abra o `.dmg` e arraste **Conversor Markdown** para a pasta **Aplicativos**.
+
+O programa não tem certificado pago da Apple, então o Mac bloqueia a primeira abertura. No macOS 15 (Sequoia) ou mais novo: tente abrir uma vez, depois vá em **Ajustes do Sistema > Privacidade e Segurança**, role até o fim e clique em **Abrir Mesmo Assim**. No macOS 14 ou anterior: clique com o botão direito no programa, escolha **Abrir** e confirme. Depois disso o Mac não pergunta mais.
+
+Para desinstalar, arraste o programa da pasta Aplicativos para o Lixo.
+
+Macs com processador Intel ainda não têm pacote pronto. Neles, dá para rodar a partir do código (veja abaixo).
+
+### Linux
+
+**Ubuntu, Debian, Mint e derivados:** baixe o `.deb` e rode `sudo apt install ./conversor-markdown_1.3.0_amd64.deb`. O Tesseract (OCR) em português é instalado junto. O programa aparece no menu de aplicativos. Para remover: `sudo apt remove conversor-markdown`.
+
+**Outras distribuições:** extraia o `.tar.gz` e rode `./instalar.sh` dentro da pasta. Ele instala só para o seu usuário, sem sudo, e cria o atalho no menu. Para remover, `./desinstalar.sh`. Para o OCR, instale o Tesseract com português pelo gerenciador de pacotes da distribuição.
+
+Para computadores de 64 bits (x86-64).
 
 ### Conferir se o arquivo é o original
 
-A partir da versão 1.1.0, o pacote é gerado pelo GitHub Actions a partir do código deste repositório, e não no computador do autor. Cada versão traz o arquivo `.sha256` com a impressão digital (hash SHA-256) do `.zip`, que também aparece nas notas da versão. Para conferir, abra o PowerShell na pasta do download e rode:
+Os pacotes são gerados e testados pelo GitHub Actions a partir do código deste repositório, e não no computador do autor. Cada arquivo publicado vem acompanhado de um `.sha256` com a impressão digital dele, que também aparece nas notas da versão. Para conferir:
 
-```
-Get-FileHash .\Conversor-Markdown-v1.2.0-windows-x64.zip -Algorithm SHA256
-```
+- Windows (PowerShell): `Get-FileHash .\NOME_DO_ARQUIVO -Algorithm SHA256`
+- Mac: `shasum -a 256 NOME_DO_ARQUIVO`
+- Linux: `sha256sum NOME_DO_ARQUIVO`
 
 O código mostrado deve ser igual ao publicado. Se for diferente, não use o arquivo.
 
@@ -57,7 +84,7 @@ Opções:
 - **Converter automaticamente ao soltar arquivos.**
 - **Anonimizar dados pessoais:** vem marcada. Veja a seção seguinte.
 
-O programa lembra essas escolhas para a próxima vez, menos "Sobrescrever", que sempre volta desmarcada para evitar que um arquivo seja trocado sem querer. Só as caixas de marcar são guardadas (em `%APPDATA%\Conversor Markdown\preferencias.json`), nunca pastas ou nomes de arquivos.
+O programa lembra essas escolhas para a próxima vez, menos "Sobrescrever", que sempre volta desmarcada para evitar que um arquivo seja trocado sem querer. Só as caixas de marcar são guardadas, nunca pastas ou nomes de arquivos. Elas ficam em `%APPDATA%\Conversor Markdown` no Windows, em `~/Library/Application Support/Conversor Markdown` no Mac e em `~/.config/conversor-markdown` no Linux.
 
 ## Anonimizar antes de usar com IA
 
@@ -91,7 +118,9 @@ Pela linha de comando, a anonimização continua desligada se não for pedida: `
 
 ## Rodar a partir do código
 
-Requer Python 3.10 ou mais recente e o [Tesseract](https://github.com/UB-Mannheim/tesseract/wiki) para o OCR.
+Requer Python 3.10 ou mais recente (com Tkinter) e o Tesseract para o OCR. Funciona em Windows, Mac (inclusive Intel) e Linux.
+
+Windows:
 
 ```powershell
 python -m venv .venv
@@ -99,30 +128,37 @@ python -m venv .venv
 .\.venv\Scripts\pythonw.exe conversor_markdown.py
 ```
 
-O programa procura o Tesseract na pasta `Tesseract-OCR` ao lado do script ou na instalação padrão do Windows.
+Mac e Linux:
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+.venv/bin/python conversor_markdown.py
+```
+
+Tesseract: no Windows, o [instalador da UB Mannheim](https://github.com/UB-Mannheim/tesseract/wiki) ou a pasta `Tesseract-OCR` ao lado do script; no Mac, `brew install tesseract tesseract-lang`; no Ubuntu/Debian, `sudo apt install tesseract-ocr tesseract-ocr-por`.
 
 Também funciona pela linha de comando:
 
-```powershell
-.\.venv\Scripts\python.exe conversor_markdown.py "C:\pasta\origem" --saida="C:\pasta\saida" [--sem-ocr] [--sem-subpastas] [--sobrescrever] [--anonimizar]
+```
+python conversor_markdown.py ORIGEM [ORIGEM...] --saida=PASTA [--sem-ocr] [--sem-subpastas] [--sobrescrever] [--anonimizar]
 ```
 
-## Compilar a versão portátil
+## Gerar os pacotes
 
-1. Crie o ambiente como acima e instale também as ferramentas de teste e compilação: `.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt`
-2. Coloque o Tesseract na pasta `Tesseract-OCR`, na raiz do projeto. Uma forma de fazer isso sem administrador é extrair o instalador da [UB Mannheim](https://github.com/UB-Mannheim/tesseract/wiki) com o 7-Zip.
-3. Baixe o [`por.traineddata`](https://github.com/tesseract-ocr/tessdata/raw/main/por.traineddata) para `Tesseract-OCR\tessdata`.
-4. Rode:
+Os pacotes publicados em Releases são gerados e testados pelo GitHub Actions (`.github/workflows/versao.yml`), um sistema por vez. Para publicar uma versão nova: altere `VERSAO` em `conversor_markdown.py` e os links da seção Baixar, envie para o ramo `main` e rode o fluxo **Pacotes (Windows, Mac e Linux)** em Actions, marcando **publicar**.
 
-```powershell
-powershell -ExecutionPolicy Bypass -File build\build_portatil.ps1 -Versao 1.2.0
-```
+Para gerar no próprio computador (sempre com o ambiente criado acima e `pip install -r requirements-dev.txt`):
 
-Os pacotes publicados em Releases são gerados da mesma forma pelo GitHub Actions (`.github/workflows/versao.yml`). O `.zip` sai na pasta `dist`. O script leva só as partes do Tesseract usadas pelo OCR e junta os textos de licença de todos os componentes.
+- **Windows** (`.zip` e instalador): coloque o Tesseract na pasta `Tesseract-OCR`, na raiz do projeto, com o [`por.traineddata`](https://github.com/tesseract-ocr/tessdata/raw/main/por.traineddata) em `Tesseract-OCR\tessdata`. Instale o [Inno Setup 6](https://jrsoftware.org/isinfo.php) e rode `powershell -ExecutionPolicy Bypass -File build\build_portatil.ps1 -Versao 1.3.0`. Sem o Inno Setup, acrescente `-SemInstalador`.
+- **Mac** (`.dmg`): `brew install tesseract dylibbundler` e depois `bash build/build_mac.sh 1.3.0`. O Tesseract e as bibliotecas dele vão para dentro do aplicativo.
+- **Linux** (`.deb` e `.tar.gz`): `bash build/build_linux.sh 1.3.0`. O OCR usa o Tesseract do sistema.
+
+Tudo sai na pasta `dist`. `python build/testar_pacote.py CAMINHO_DO_EXECUTAVEL` testa um pacote pronto (conversão, OCR e anonimização).
 
 ### Testes e motor de anonimização
 
-`python -m pytest` roda os testes, que também rodam no GitHub Actions (Windows e Linux) a cada envio.
+`python -m pytest` roda os testes, que também rodam no GitHub Actions (Windows, Mac e Linux) a cada envio.
 
 A pasta `anonimizador/` é uma cópia do motor de detecção do [Anonimizador LGPD](https://github.com/n-lobato/anonimizador-lgpd). Não edite lá: corrija no anonimizador e traga a nova versão com `python build/atualizar_motor.py CAMINHO_DO_ANONIMIZADOR`.
 

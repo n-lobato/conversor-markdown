@@ -10,7 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu-latest]
+        os: [windows-latest, ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
@@ -19,8 +19,8 @@ jobs:
           python-version: "3.12"
       - name: Instalar dependências
         run: python -m pip install -r requirements-dev.txt
-      - name: Testes (Windows, sem OCR; o OCR é testado no fluxo do executável)
-        if: runner.os == 'Windows'
+      - name: Testes (Windows e Mac, sem OCR; o OCR é testado no fluxo dos pacotes)
+        if: runner.os != 'Linux'
         run: python -m pytest -v
       - name: Testes (Linux, com OCR e tela virtual para a janela)
         if: runner.os == 'Linux'

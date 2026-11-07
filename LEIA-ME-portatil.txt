@@ -1,9 +1,16 @@
-CONVERSOR PARA MARKDOWN (VERSÃO PORTÁTIL)
+CONVERSOR MARKDOWN PARA WINDOWS
 
 Tudo roda no computador. Nenhum arquivo é enviado para a internet.
-Não precisa instalar nada, nem Python, nem ter permissão de administrador.
+Não precisa de Python nem de permissão de administrador.
 
-PARA LEVAR PARA OUTRO COMPUTADOR
+Existem duas formas de usar, com o mesmo programa:
+- Instalador (arquivo "...-instalador.exe"): instala só para o seu usuário,
+  cria atalho no menu Iniciar e aparece em Configurações > Aplicativos >
+  Aplicativos instalados, de onde também é desinstalado.
+- Versão portátil (arquivo .zip): não instala nada. Serve para levar num
+  pen drive. Para remover, basta apagar a pasta.
+
+VERSÃO PORTÁTIL: PARA LEVAR PARA OUTRO COMPUTADOR
 1. Copie o arquivo .zip (pen drive, mensageiro, rede).
 2. No outro computador, clique com o botão direito no .zip e escolha
    "Extrair tudo". Não rode o programa de dentro do .zip sem extrair.
@@ -39,13 +46,17 @@ OPÇÕES
   de Word e PowerPoint (português e inglês). Deixa a conversão mais lenta.
 - Incluir subpastas: percorre todas as pastas internas da origem.
 - Sobrescrever .md existentes: se desmarcado, arquivos já convertidos são pulados.
-- Anonimizar dados pessoais: troca nomes, CPF, endereços e outros dados por
+- Anonimizar dados pessoais (vem marcada): troca nomes, CPF, endereços e outros dados por
   códigos ([PESSOA_1], [CPF_1]...) antes de salvar. Antes de gravar, abre uma
   tela de revisão: desmarque o que não for dado pessoal e inclua o que faltou.
   Os arquivos saem com o sufixo "_anonimizado". Se a revisão for cancelada,
   nada é salvo. Atenção: nenhum programa encontra tudo (cerca de 1 em cada
   10 nomes passa sem ser detectado) e os nomes dos arquivos não são trocados.
   Confira o resultado antes de compartilhar.
+
+O programa lembra as opções marcadas para a próxima vez, menos "Sobrescrever",
+que sempre volta desmarcada. Elas ficam em %APPDATA%\Conversor Markdown
+(só as caixas de marcar, nunca pastas ou nomes de arquivos).
 
 LIMITAÇÕES
 - Arquivos antigos .doc e .ppt não são convertidos. Abra no Office e salve

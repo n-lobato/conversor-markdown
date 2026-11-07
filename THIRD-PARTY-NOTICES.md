@@ -2,7 +2,7 @@
 
 O Conversor Markdown é distribuído sob a licença GNU AGPL v3 (arquivo `LICENSE`).
 Ele usa os componentes abaixo, cada um com a sua própria licença. Os textos das
-licenças acompanham a versão portátil, na pasta `LICENCAS`.
+licenças acompanham os pacotes de cada sistema, na pasta `LICENCAS`.
 
 ## Bibliotecas Python principais
 
@@ -25,7 +25,7 @@ sob GPL-3.0 (texto em `anonimizador/LICENSE-GPL-3.0.txt`). A GPL-3.0 e a AGPL-3.
 podem ser combinadas, conforme a seção 13 de cada uma.
 
 A lista completa, com versões, é gerada automaticamente no build
-(`LICENCAS/python/_INDICE.md` na versão portátil).
+(`LICENCAS/python/_INDICE.md` nos pacotes).
 
 ## Python e Tcl/Tk
 
@@ -44,7 +44,7 @@ Os binários para Windows vêm da compilação da
 feita sobre pacotes do [MSYS2](https://packages.msys2.org), onde está o código-fonte
 de cada biblioteca abaixo.
 
-A versão portátil leva apenas as DLLs que o `tesseract.exe` realmente usa:
+O pacote para Windows (portátil e instalador) leva apenas as DLLs que o `tesseract.exe` realmente usa:
 
 | Biblioteca | Arquivo | Licença |
 | --- | --- | --- |
@@ -74,3 +74,18 @@ A versão portátil leva apenas as DLLs que o `tesseract.exe` realmente usa:
 
 As bibliotecas sob GPL/LGPL são distribuídas sem modificação, como arquivos DLL
 separados, e o código-fonte delas está disponível nos endereços acima.
+
+### No Mac
+
+O pacote para Mac leva o Tesseract e as bibliotecas de que ele depende, compilados
+pelo [Homebrew](https://brew.sh) (o código-fonte de cada um está na página da fórmula
+correspondente). A lista exata, com versões e licenças, é gerada no build e fica em
+`Contents/Resources/LICENCAS/Tesseract-e-bibliotecas/_INDICE.md`, dentro do aplicativo,
+junto com os textos de licença de cada biblioteca. As bibliotecas são copiadas sem
+modificação de código, apenas com os caminhos de carregamento ajustados para ficarem
+dentro do aplicativo.
+
+### No Linux
+
+Os pacotes para Linux não levam o Tesseract: o OCR usa o Tesseract instalado pelo
+gerenciador de pacotes da distribuição (o `.deb` o instala como dependência).

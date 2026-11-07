@@ -13,6 +13,8 @@ Conversor em lote para Markdown (100% local, sem upload).
 Formatos: PDF, DOCX, PPTX, XLSX/XLSM, XLS, CSV e imagens (PNG, JPG, TIF, BMP, GIF, WEBP).
 OCR (Tesseract) para imagens e para paginas de PDF escaneadas.
 
+Roda em Windows, Mac e Linux.
+
 Uso:
   Janela:        pythonw conversor_markdown.py
   Linha de cmd:  python conversor_markdown.py ORIGEM [ORIGEM...] --saida=PASTA [--sem-ocr] [--sem-subpastas] [--sobrescrever]
@@ -38,7 +40,7 @@ if getattr(sys, "frozen", False):
 else:
     APP_DIR = Path(__file__).resolve().parent
 
-VERSAO = "1.2.0"
+VERSAO = "1.3.0"
 SUFIXO_ANONIMIZADO = "_anonimizado"
 
 # no .exe sem console, stdout/stderr nao existem; evita erro de bibliotecas que imprimem
@@ -63,6 +65,31 @@ SUPORTADAS = EXT_PDF | EXT_WORD | EXT_PPT | EXT_EXCEL | EXT_XLS | EXT_CSV | EXT_
 # OCR
 # ----------------------------------------------------------------------------
 
+def localizar_tesseract():
+    """Primeiro o Tesseract que vem com o programa; depois o instalado no sistema."""
+    if sys.platform.startswith("win"):
+        candidatos = [
+            APP_DIR / "Tesseract-OCR" / "tesseract.exe",
+            Path(os.environ.get("ProgramFiles", r"C:\Program Files")) / "Tesseract-OCR" / "tesseract.exe",
+            Path(os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)")) / "Tesseract-OCR" / "tesseract.exe",
+            Path(os.environ.get("LOCALAPPDATA", "")) / "Programs" / "Tesseract-OCR" / "tesseract.exe",
+        ]
+    else:
+        candidatos = [
+            APP_DIR.parent / "Frameworks" / "Tesseract-OCR" / "tesseract",  # dentro do .app no Mac
+            APP_DIR / "Tesseract-OCR" / "tesseract",
+            # programas abertos pelo Finder não recebem o PATH do Homebrew
+            Path("/opt/homebrew/bin/tesseract"),
+            Path("/usr/local/bin/tesseract"),
+            Path("/usr/bin/tesseract"),
+        ]
+    achado = next((c for c in candidatos if c.is_file()), None)
+    if achado:
+        return achado
+    no_path = shutil.which("tesseract")
+    return Path(no_path) if no_path else None
+
+
 class OCR:
     def __init__(self):
         self.disponivel = False
@@ -76,20 +103,23 @@ class OCR:
             return
         self.pt = pytesseract
 
-        candidatos = [
-            APP_DIR / "Tesseract-OCR" / "tesseract.exe",
-            Path(os.environ.get("ProgramFiles", r"C:\Program Files")) / "Tesseract-OCR" / "tesseract.exe",
-            Path(os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)")) / "Tesseract-OCR" / "tesseract.exe",
-            Path(os.environ.get("LOCALAPPDATA", "")) / "Programs" / "Tesseract-OCR" / "tesseract.exe",
-        ]
-        exe = next((str(c) for c in candidatos if c.is_file()), None) or shutil.which("tesseract")
+        exe = localizar_tesseract()
         if not exe:
-            self.motivo = "Tesseract nao encontrado"
+            if sys.platform == "darwin":
+                self.motivo = "Tesseract nao encontrado (instale com: brew install tesseract tesseract-lang)"
+            elif not sys.platform.startswith("win"):
+                self.motivo = ("Tesseract nao encontrado (no Ubuntu/Debian: "
+                               "sudo apt install tesseract-ocr tesseract-ocr-por)")
+            else:
+                self.motivo = "Tesseract nao encontrado"
             return
-        pytesseract.pytesseract.tesseract_cmd = exe
+        pytesseract.pytesseract.tesseract_cmd = str(exe)
 
-        if (TESSDATA_DIR / "por.traineddata").is_file():
-            self.config = f'--tessdata-dir "{TESSDATA_DIR}"'
+        # o Tesseract que vem com o programa usa os idiomas da pasta dele
+        for pasta in (exe.parent / "tessdata", APP_DIR.parent / "Resources" / "tessdata", TESSDATA_DIR):
+            if (pasta / "por.traineddata").is_file():
+                self.config = f'--tessdata-dir "{pasta}"'
+                break
         try:
             idiomas = set(pytesseract.get_languages(config=self.config))
         except Exception as e:  # noqa: BLE001
@@ -624,12 +654,20 @@ def abrir_janela(entradas_iniciais=None):
         tem_dnd = False
 
     raiz.title(f"Conversor Markdown {VERSAO} (local)")
+    icone = Path(getattr(sys, "_MEIPASS", APP_DIR)) / "assets" / "icone.png"
+    if icone.is_file():
+        try:
+            raiz._icone = tk.PhotoImage(file=str(icone))
+            raiz.iconphoto(True, raiz._icone)
+        except Exception:  # noqa: BLE001  (sem ícone a janela funciona igual)
+            pass
     raiz.geometry("780x620")
     raiz.minsize(660, 520)
 
     fila = queue.Queue()
     estado = {"rodando": False, "cancelar": False, "arquivos": [], "saida_auto": None}
 
+    import plataforma
     import preferencias
 
     prefs = preferencias.carregar()
@@ -659,7 +697,7 @@ def abrir_janela(entradas_iniciais=None):
     # area de soltar
     texto_area = ("Arraste arquivos ou pastas para cá" if tem_dnd
                   else "Arrastar e soltar indisponível. Use os botões abaixo.")
-    area = tk.Label(frm, text=texto_area, font=("Segoe UI", 12), fg="#335", bg="#eef2f8",
+    area = tk.Label(frm, text=texto_area, font=plataforma.fonte_ui(12), fg="#335", bg="#eef2f8",
                     relief="groove", bd=2, height=3, cursor="hand2" if tem_dnd else "")
     area.grid(row=1, column=0, columnspan=4, sticky="ew", pady=(0, 10))
 
@@ -732,7 +770,7 @@ def abrir_janela(entradas_iniciais=None):
     status = ttk.Label(frm, text="Pronto.")
     status.grid(row=7, column=0, columnspan=4, sticky="w", pady=(4, 6))
 
-    caixa = ScrolledText(frm, height=12, font=("Consolas", 9), state="disabled")
+    caixa = ScrolledText(frm, height=12, font=plataforma.fonte_mono(9), state="disabled")
     caixa.grid(row=8, column=0, columnspan=4, sticky="nsew")
     frm.rowconfigure(8, weight=1)
 
@@ -742,7 +780,7 @@ def abrir_janela(entradas_iniciais=None):
     def abrir_saida():
         p = saida_var.get()
         if p and Path(p).exists():
-            os.startfile(p)
+            plataforma.abrir_pasta(p)
 
     ttk.Button(botoes, text="Abrir pasta de saida", command=abrir_saida).pack(side="left", padx=4)
     btn_cancelar = ttk.Button(botoes, text="Cancelar", state="disabled",
@@ -856,6 +894,12 @@ def abrir_janela(entradas_iniciais=None):
             alvo.dnd_bind("<<Drop>>", ao_soltar)
             alvo.dnd_bind("<<DropEnter>>", ao_entrar)
             alvo.dnd_bind("<<DropLeave>>", ao_sair)
+
+    if plataforma.MAC:
+        # no Mac, arquivos soltos no ícone do Dock/Finder chegam por este evento, não pela linha de comando
+        def abrir_no_mac(*caminhos):
+            carregar(list(caminhos), iniciar=True)
+        raiz.createcommand("::tk::mac::OpenDocument", abrir_no_mac)
 
     raiz.after(100, processar_fila)
     if entradas_iniciais:

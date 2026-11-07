@@ -10,12 +10,14 @@ propósito: volta sempre desmarcada, para ninguém apagar um arquivo sem percebe
 
 Local do arquivo:
   Windows: %APPDATA%\\Conversor Markdown\\preferencias.json
-  Outros:  ~/.config/conversor-markdown/preferencias.json
+  Mac:     ~/Library/Application Support/Conversor Markdown/preferencias.json
+  Linux:   ~/.config/conversor-markdown/preferencias.json
 A variável de ambiente CONVERSOR_MARKDOWN_PREFERENCIAS troca o caminho (usada nos testes).
 """
 
 import json
 import os
+import sys
 from pathlib import Path
 
 # anonimizar vem ligado: quem desliga é que precisa decidir isso de propósito
@@ -29,6 +31,8 @@ def arquivo():
     if os.name == "nt":
         base = Path(os.environ.get("APPDATA") or Path.home())
         return base / "Conversor Markdown" / "preferencias.json"
+    if sys.platform == "darwin":
+        return Path.home() / "Library" / "Application Support" / "Conversor Markdown" / "preferencias.json"
     base = Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config")
     return base / "conversor-markdown" / "preferencias.json"
 

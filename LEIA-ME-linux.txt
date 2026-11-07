@@ -1,0 +1,38 @@
+CONVERSOR MARKDOWN PARA LINUX
+
+Tudo roda no computador. Nenhum arquivo é enviado para a internet.
+Para computadores de 64 bits (x86-64).
+
+INSTALAR
+Ubuntu, Debian, Mint e derivados: use o pacote .deb, que também instala o
+Tesseract (OCR) em português:
+  sudo apt install ./conversor-markdown_VERSAO_amd64.deb
+Para remover:
+  sudo apt remove conversor-markdown
+
+Outras distribuições: use o .tar.gz. Extraia e rode, dentro da pasta extraída:
+  ./instalar.sh
+Ele instala só para o seu usuário, sem sudo, e cria o atalho no menu.
+Para remover: ./desinstalar.sh
+Para o OCR, instale o Tesseract com português pelo gerenciador da sua
+distribuição (Fedora: tesseract e tesseract-langpack-por; Arch: tesseract e
+tesseract-data-por).
+
+COMO USAR
+Abra "Conversor Markdown" no menu de aplicativos. Arraste arquivos ou pastas
+para a janela, ou use os botões "Pasta..." e "Arquivos...".
+
+Pelo terminal:
+  conversor-markdown ORIGEM --saida=PASTA [--sem-ocr] [--sem-subpastas] [--sobrescrever] [--anonimizar]
+
+A opção "Anonimizar dados pessoais" vem marcada na janela: antes de salvar,
+abre uma tela para revisar os nomes, CPF, endereços e outros dados encontrados.
+Nenhum programa encontra tudo (cerca de 1 em cada 10 nomes passa sem ser
+detectado). Confira o resultado antes de compartilhar.
+
+As opções da janela ficam guardadas em ~/.config/conversor-markdown.
+
+LICENÇA E CÓDIGO-FONTE
+Software livre sob a GNU AGPL v3. Código-fonte e novas versões:
+https://github.com/n-lobato/conversor-markdown
+As licenças dos componentes estão na pasta LICENCAS do programa.
