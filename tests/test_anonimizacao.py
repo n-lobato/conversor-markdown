@@ -138,16 +138,21 @@ def test_janela_de_revisao():
 
 
 @pytest.mark.skipif(os.name != "nt" and not os.environ.get("DISPLAY"), reason="sem tela")
-def test_janela_principal_tem_a_opcao():
+def test_janela_principal_tem_a_opcao(tmp_path, monkeypatch):
     raiz = _tk()
     raiz.destroy()
     import tkinter as tk
+    from tkinter import ttk
+
+    arq_prefs = tmp_path / "preferencias.json"
+    monkeypatch.setenv("CONVERSOR_MARKDOWN_PREFERENCIAS", str(arq_prefs))
     criadas = []
     original = tk.Tk.mainloop
+    mudar_para = {}
 
     def sem_loop(self, n=0):
         criadas.append(self)
-        textos = []
+        textos, marcadas = [], {}
 
         def coletar(w):
             for c in w.winfo_children():
@@ -155,15 +160,29 @@ def test_janela_principal_tem_a_opcao():
                     textos.append(str(c.cget("text")))
                 except Exception:  # noqa: BLE001
                     pass
+                if isinstance(c, ttk.Checkbutton):
+                    nome_var = str(c.cget("variable"))
+                    marcadas[str(c.cget("text"))] = bool(self.getboolean(self.getvar(nome_var)))
+                    if str(c.cget("text")).startswith("Anonimizar") and "anon" in mudar_para:
+                        self.setvar(nome_var, mudar_para["anon"])
                 coletar(c)
 
         coletar(self)
-        self.textos = textos
+        self.textos, self.marcadas = textos, marcadas
         self.destroy()
 
     tk.Tk.mainloop = sem_loop
     try:
         cm.abrir_janela()
+        # desmarca na primeira abertura e confere que a segunda lembra
+        mudar_para["anon"] = False
+        cm.abrir_janela()
+        mudar_para.clear()
+        cm.abrir_janela()
     finally:
         tk.Tk.mainloop = original
     assert criadas and any("Anonimizar dados pessoais" in t for t in criadas[0].textos)
+    chave = next(t for t in criadas[0].marcadas if t.startswith("Anonimizar"))
+    assert criadas[0].marcadas[chave] is True, "a anonimização deve vir marcada por padrão"
+    assert criadas[2].marcadas[chave] is False, "a escolha do usuário deve ser lembrada"
+    assert criadas[2].marcadas["Sobrescrever .md existentes"] is False

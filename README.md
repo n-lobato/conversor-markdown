@@ -1,6 +1,6 @@
 # Conversor Markdown
 
-## [Baixar o programa para Windows (.zip, 139 MB)](https://github.com/n-lobato/conversor-markdown/releases/latest/download/Conversor-Markdown-v1.1.1-windows-x64.zip)
+## [Baixar o programa para Windows (.zip, 139 MB)](https://github.com/n-lobato/conversor-markdown/releases/latest/download/Conversor-Markdown-v1.2.0-windows-x64.zip)
 
 > **Atenção:** não use o botão verde **Code > Download ZIP**. Ele baixa só o código-fonte, que não roda sem Python instalado. O programa pronto é o link acima, também disponível na página de [Releases](https://github.com/n-lobato/conversor-markdown/releases/latest).
 
@@ -24,7 +24,7 @@ Muitos conversores online pedem o upload do documento. Para contratos, processos
 
 ## Download
 
-Baixe o arquivo **[Conversor-Markdown-v1.1.1-windows-x64.zip](https://github.com/n-lobato/conversor-markdown/releases/latest/download/Conversor-Markdown-v1.1.1-windows-x64.zip)** na página de **[Releases](https://github.com/n-lobato/conversor-markdown/releases/latest)**. Não confunda com o "Download ZIP" do botão verde Code, que traz apenas o código-fonte.
+Baixe o arquivo **[Conversor-Markdown-v1.2.0-windows-x64.zip](https://github.com/n-lobato/conversor-markdown/releases/latest/download/Conversor-Markdown-v1.2.0-windows-x64.zip)** na página de **[Releases](https://github.com/n-lobato/conversor-markdown/releases/latest)**. Não confunda com o "Download ZIP" do botão verde Code, que traz apenas o código-fonte.
 
 1. Extraia o `.zip` (botão direito > Extrair tudo).
 2. Abra `Conversor Markdown.exe`.
@@ -38,7 +38,7 @@ Na primeira execução, o Windows pode mostrar o aviso "O Windows protegeu o com
 A partir da versão 1.1.0, o pacote é gerado pelo GitHub Actions a partir do código deste repositório, e não no computador do autor. Cada versão traz o arquivo `.sha256` com a impressão digital (hash SHA-256) do `.zip`, que também aparece nas notas da versão. Para conferir, abra o PowerShell na pasta do download e rode:
 
 ```
-Get-FileHash .\Conversor-Markdown-v1.1.1-windows-x64.zip -Algorithm SHA256
+Get-FileHash .\Conversor-Markdown-v1.2.0-windows-x64.zip -Algorithm SHA256
 ```
 
 O código mostrado deve ser igual ao publicado. Se for diferente, não use o arquivo.
@@ -55,11 +55,13 @@ Opções:
 - **Incluir subpastas.**
 - **Sobrescrever .md existentes:** se desmarcado, arquivos já convertidos são pulados.
 - **Converter automaticamente ao soltar arquivos.**
-- **Anonimizar dados pessoais:** veja a seção seguinte.
+- **Anonimizar dados pessoais:** vem marcada. Veja a seção seguinte.
+
+O programa lembra essas escolhas para a próxima vez, menos "Sobrescrever", que sempre volta desmarcada para evitar que um arquivo seja trocado sem querer. Só as caixas de marcar são guardadas (em `%APPDATA%\Conversor Markdown\preferencias.json`), nunca pastas ou nomes de arquivos.
 
 ## Anonimizar antes de usar com IA
 
-Converter no próprio computador evita o upload do arquivo original, mas o Markdown gerado continua com todos os dados pessoais. Se ele for colado numa ferramenta de IA na nuvem, o problema volta. Para isso existe a opção **Anonimizar dados pessoais (com revisão antes de salvar)**.
+Converter no próprio computador evita o upload do arquivo original, mas o Markdown gerado continuaria com todos os dados pessoais. Se ele for colado numa ferramenta de IA na nuvem, o problema volta. Por isso a opção **Anonimizar dados pessoais (com revisão antes de salvar)** vem marcada a partir da versão 1.2.0. Quem desmarcar recebe um aviso no registro da conversão, e a escolha fica lembrada.
 
 Com ela marcada:
 
@@ -70,13 +72,15 @@ Com ela marcada:
 
 Se a revisão for cancelada ou algo der errado na anonimização, **nenhum arquivo é salvo**. Assim não sai, por engano, um Markdown com dados pessoais quando a anonimização foi pedida.
 
+**Por que anonimizar o texto convertido, e não o arquivo original?** Porque é o texto convertido que vai parar no Markdown, inclusive o que o OCR leu em imagens, prints, carimbos e assinaturas dentro de Word e PowerPoint. Se o original fosse anonimizado primeiro, esse conteúdo de imagem passaria direto, e formatos como PowerPoint e `.xls` ficariam de fora. E o Markdown não é gravado no disco antes da hora: a conversão fica na memória até a revisão terminar.
+
 Leve a sério a revisão. Na medição publicada no Anonimizador LGPD, **cerca de 1 em cada 10 nomes passou sem ser detectado** em textos que o programa não conhecia. Além disso:
 
 - trocar nomes e números não basta se o contexto (cargo, local, datas, fatos) ainda permitir saber quem é a pessoa;
 - os **nomes dos arquivos** não são alterados. Se o nome do arquivo tiver o nome de alguém, renomeie antes;
 - não é gerada tabela de correspondência entre códigos e dados originais. Para isso, ou para anonimizar Word e PDF mantendo o formato original, use o Anonimizador LGPD.
 
-Pela linha de comando, `--anonimizar` faz a troca **sem revisão manual** e mostra um aviso. Use só quando for conferir os arquivos depois.
+Pela linha de comando, a anonimização continua desligada se não for pedida: `--anonimizar` faz a troca **sem revisão manual** e mostra um aviso. Use só quando for conferir os arquivos depois.
 
 ## Limitações
 
@@ -111,7 +115,7 @@ Também funciona pela linha de comando:
 4. Rode:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File build\build_portatil.ps1 -Versao 1.1.1
+powershell -ExecutionPolicy Bypass -File build\build_portatil.ps1 -Versao 1.2.0
 ```
 
 Os pacotes publicados em Releases são gerados da mesma forma pelo GitHub Actions (`.github/workflows/versao.yml`). O `.zip` sai na pasta `dist`. O script leva só as partes do Tesseract usadas pelo OCR e junta os textos de licença de todos os componentes.
