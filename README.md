@@ -6,7 +6,7 @@
 | --- | --- |
 | **Windows 10 e 11** (recomendado) | [Instalador](https://github.com/n-lobato/conversor-markdown/releases/latest/download/Conversor-Markdown-v1.3.0-windows-x64-instalador.exe) |
 | Windows, versão portátil (pen drive) | [.zip](https://github.com/n-lobato/conversor-markdown/releases/latest/download/Conversor-Markdown-v1.3.0-windows-x64.zip) |
-| **Mac** com chip Apple (M1 ou mais novo) | [.dmg](https://github.com/n-lobato/conversor-markdown/releases/latest/download/Conversor-Markdown-v1.3.0-mac-apple-silicon.dmg) |
+| **Mac** com chip Apple, macOS 15.8.1 ou mais novo | [.dmg](https://github.com/n-lobato/conversor-markdown/releases/latest/download/Conversor-Markdown-v1.3.0-mac-apple-silicon.dmg) |
 | **Linux** Ubuntu, Debian, Mint | [.deb](https://github.com/n-lobato/conversor-markdown/releases/latest/download/conversor-markdown_1.3.0_amd64.deb) |
 | Outras distribuições Linux | [.tar.gz](https://github.com/n-lobato/conversor-markdown/releases/latest/download/Conversor-Markdown-v1.3.0-linux-x64.tar.gz) |
 
@@ -44,13 +44,13 @@ Funciona no Windows 10 e 11 (64 bits), com o OCR já incluído. Na primeira vez,
 
 ### Mac
 
-Para Macs com chip Apple (M1, M2, M3, M4 ou mais novos), com o OCR já incluído. Abra o `.dmg` e arraste **Conversor Markdown** para a pasta **Aplicativos**.
+Para Macs com chip Apple (M1, M2, M3, M4 ou mais novos) com macOS 15.8.1 (Sequoia) ou mais novo, incluindo o macOS 26 (Tahoe). O OCR já vem incluído. Abra o `.dmg` e arraste **Conversor Markdown** para a pasta **Aplicativos**.
 
-O programa não tem certificado pago da Apple, então o Mac bloqueia a primeira abertura. No macOS 15 (Sequoia) ou mais novo: tente abrir uma vez, depois vá em **Ajustes do Sistema > Privacidade e Segurança**, role até o fim e clique em **Abrir Mesmo Assim**. No macOS 14 ou anterior: clique com o botão direito no programa, escolha **Abrir** e confirme. Depois disso o Mac não pergunta mais.
+O programa não tem certificado pago da Apple, então o Mac bloqueia a primeira abertura. Tente abrir uma vez, depois vá em **Ajustes do Sistema > Privacidade e Segurança**, role até o fim e clique em **Abrir Mesmo Assim**. Depois disso o Mac não pergunta mais.
 
 Para desinstalar, arraste o programa da pasta Aplicativos para o Lixo.
 
-Macs com processador Intel ainda não têm pacote pronto. Neles, dá para rodar a partir do código (veja abaixo).
+Macs com processador Intel ou com macOS mais antigo ainda não têm pacote pronto. Neles, dá para rodar a partir do código (veja abaixo).
 
 ### Linux
 

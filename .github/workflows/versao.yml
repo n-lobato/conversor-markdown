@@ -199,7 +199,7 @@ jobs:
             echo "| --- | --- |"
             echo "| Windows 10 e 11, instalação normal (recomendado) | \`Conversor-Markdown-v$VERSAO-windows-x64-instalador.exe\` |"
             echo "| Windows, versão portátil (pen drive, sem instalar) | \`Conversor-Markdown-v$VERSAO-windows-x64.zip\` |"
-            echo "| Mac com chip Apple (M1 ou mais novo) | \`Conversor-Markdown-v$VERSAO-mac-apple-silicon.dmg\` |"
+            echo "| Mac com chip Apple e macOS 15.8.1 ou mais novo | \`Conversor-Markdown-v$VERSAO-mac-apple-silicon.dmg\` |"
             echo "| Ubuntu, Debian, Mint | \`conversor-markdown_${VERSAO}_amd64.deb\` |"
             echo "| Outras distribuições Linux | \`Conversor-Markdown-v$VERSAO-linux-x64.tar.gz\` |"
             echo
