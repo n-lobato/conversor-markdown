@@ -15,6 +15,7 @@ from tkinter import messagebox, simpledialog, ttk
 from anonimizador.deteccao.modelo import descricao
 
 from anonimizacao import TIPOS_DISPONIVEIS
+from plataforma import fonte_ui
 
 MARCADO, DESMARCADO = "☑", "☐"
 
@@ -61,10 +62,10 @@ class JanelaRevisao(tk.Toplevel):
         self.tabela.bind("<<TreeviewSelect>>", lambda e: self.mostrar_contexto())
 
         ttk.Label(frm, text="Onde aparece:").grid(row=2, column=0, sticky="w", pady=(8, 2))
-        self.contexto = tk.Text(frm, height=7, wrap="word", font=("Segoe UI", 9), state="disabled",
+        self.contexto = tk.Text(frm, height=7, wrap="word", font=fonte_ui(9), state="disabled",
                                 background="#f7f7f7")
         self.contexto.grid(row=3, column=0, columnspan=2, sticky="nsew")
-        self.contexto.tag_configure("arq", foreground="#335", font=("Segoe UI", 9, "bold"))
+        self.contexto.tag_configure("arq", foreground="#335", font=fonte_ui(9, "bold"))
 
         botoes = ttk.Frame(frm)
         botoes.grid(row=4, column=0, columnspan=2, sticky="ew", pady=(10, 0))
