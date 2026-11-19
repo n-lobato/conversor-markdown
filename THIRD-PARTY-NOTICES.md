@@ -53,12 +53,16 @@ O pacote para Windows (portátil e instalador) leva apenas as DLLs que o `tesser
 | libarchive | libarchive-13.dll | BSD-2-Clause |
 | BLAKE2 | libb2-1.dll | CC0-1.0, OpenSSL ou Apache-2.0 |
 | bzip2 | libbz2-1.dll | bzip2 (estilo BSD) |
+| Brotli | libbrotlicommon.dll, libbrotlidec.dll | MIT |
 | OpenSSL | libcrypto-3-x64.dll | Apache-2.0 |
+| curl | libcurl-4.dll | curl (estilo MIT) |
 | libdeflate | libdeflate.dll | MIT |
 | Expat | libexpat-1.dll | MIT |
 | GCC runtime | libgcc_s_seh-1.dll, libstdc++-6.dll | GPL-3.0 com GCC Runtime Library Exception |
 | GIFLIB | libgif-7.dll | MIT |
 | GNU libiconv | libiconv-2.dll | LGPL-2.1-or-later |
+| GNU libidn2 | libidn2-0.dll | LGPL-3.0-or-later ou GPL-2.0-or-later |
+| GNU gettext (runtime) | libintl-8.dll | LGPL-2.1-or-later |
 | JBIG-KIT | libjbig-0.dll | GPL-2.0-or-later |
 | libjpeg-turbo | libjpeg-8.dll | IJG, BSD-3-Clause e zlib |
 | LERC | libLerc.dll | Apache-2.0 |
@@ -66,8 +70,11 @@ O pacote para Windows (portátil e instalador) leva apenas as DLLs que o `tesser
 | XZ Utils | liblzma-5.dll | 0BSD / domínio público |
 | OpenJPEG | libopenjp2-7.dll | BSD-2-Clause |
 | libpng | libpng16-16.dll | libpng |
+| libpsl | libpsl-5.dll | MIT |
+| libssh2 | libssh2-1.dll | BSD-3-Clause |
 | libwebp | libwebp-7.dll, libwebpmux-3.dll, libsharpyuv-0.dll | BSD-3-Clause |
 | libtiff | libtiff-6.dll | libtiff (estilo BSD) |
+| GNU libunistring | libunistring-5.dll | LGPL-3.0-or-later ou GPL-2.0-or-later |
 | mingw-w64 winpthreads | libwinpthread-1.dll | MIT e ZPL-2.1 |
 | Zstandard | libzstd.dll | BSD-3-Clause |
 | zlib | zlib1.dll | zlib |
