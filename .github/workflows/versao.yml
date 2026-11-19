@@ -96,9 +96,12 @@ jobs:
           if (Test-Path "$env:APPDATA\Conversor Markdown") { throw "Desinstalação deixou as preferências para trás" }
           Write-Output "Instalar e desinstalar: OK"
 
-      - name: Licenças das DLLs incluídas
+      - name: Licenças das DLLs incluídas e formato do .zip
         shell: pwsh
-        run: .\.venv\Scripts\python.exe build\verificar_licencas_dlls.py "teste_zip\Conversor Markdown\Tesseract-OCR"
+        run: |
+          .\.venv\Scripts\python.exe build\verificar_licencas_dlls.py "teste_zip\Conversor Markdown\Tesseract-OCR"
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          .\.venv\Scripts\python.exe -c "import sys, zipfile; n = zipfile.ZipFile(sys.argv[1]).namelist(); r = [x for x in n if chr(92) in x]; print('.zip:', len(n), 'entradas;', 'barra invertida em', len(r) if r else 'nenhuma'); sys.exit(1 if r else 0)" "dist\Conversor-Markdown-v$env:VERSAO-windows-x64.zip"
 
       - uses: actions/upload-artifact@v7
         with:

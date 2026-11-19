@@ -73,6 +73,22 @@ Copy-Item anonimizador\LICENSE-GPL-3.0.txt "$lic\LICENSE-motor-Anonimizador-LGPD
 Copy-Item "$tess\doc\LICENSE" "$lic\Tesseract\LICENSE.txt"
 $dlls | Out-File -Encoding utf8 "$lic\Tesseract\DLLS-INCLUIDAS.txt"
 if (Test-Path "$tess\doc\AUTHORS") { Copy-Item "$tess\doc\AUTHORS" "$lic\Tesseract\AUTHORS.txt" }
+# Textos de licenca de cada DLL, tirados dos pacotes MSYS2 de onde elas vem.
+# No GitHub Actions (CI) e obrigatorio; num build local sem MSYS2 so avisa.
+$msys = if ($env:MSYS2_ROOT) { $env:MSYS2_ROOT } else { 'C:\msys64' }
+if (Test-Path "$msys\usr\bin\bash.exe") {
+    $argsLic = @('build\licencas_windows.py', '--msys', $msys, '--destino', "$lic\Tesseract\bibliotecas")
+    if ($env:CI) { $argsLic += '--obrigatorio' }
+    $ErrorActionPreference = 'Continue'
+    & $py @argsLic @dlls
+    $codigo = $LASTEXITCODE
+    $ErrorActionPreference = 'Stop'
+    if ($codigo -ne 0) { throw "Falha ao reunir os textos de licenca das DLLs do Tesseract." }
+} elseif ($env:CI) {
+    throw "MSYS2 nao encontrado em ${msys}: necessario para os textos de licenca das DLLs."
+} else {
+    Write-Warning "MSYS2 nao encontrado em ${msys}: o pacote sai sem os textos de licenca das DLLs."
+}
 $base = (& $py -c "import sys; print(sys.base_prefix)").Trim()
 Copy-Item "$base\LICENSE.txt" "$lic\Python-e-TclTk\Python-LICENSE.txt"
 foreach ($x in 'tcl8.6', 'tk8.6') {
@@ -85,8 +101,10 @@ Write-Host "4/5 Compactando..."
 New-Item -ItemType Directory -Force "$raiz\dist" | Out-Null
 $zip = "$raiz\dist\Conversor-Markdown-v$Versao-windows-x64.zip"
 Remove-Item $zip -ErrorAction SilentlyContinue
-Add-Type -AssemblyName System.IO.Compression.FileSystem
-[IO.Compression.ZipFile]::CreateFromDirectory("$tmp\dist", $zip, [IO.Compression.CompressionLevel]::Optimal, $false)
+# Python em vez de [IO.Compression.ZipFile]::CreateFromDirectory, que no Windows
+# PowerShell 5.1 grava os caminhos com barra invertida (fora do padrao do zip).
+& $py build\criar_zip.py "$tmp\dist" $zip
+if ($LASTEXITCODE -ne 0) { throw "Falha ao criar o .zip." }
 Write-Host ("    {0} ({1:N0} MB)" -f $zip, ((Get-Item $zip).Length / 1MB))
 
 if ($SemInstalador) {

@@ -40,7 +40,7 @@ if getattr(sys, "frozen", False):
 else:
     APP_DIR = Path(__file__).resolve().parent
 
-VERSAO = "1.3.1"
+VERSAO = "1.3.2"
 SUFIXO_ANONIMIZADO = "_anonimizado"
 
 # no .exe sem console, stdout/stderr nao existem; evita erro de bibliotecas que imprimem

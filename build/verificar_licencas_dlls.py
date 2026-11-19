@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-"""Confere se cada DLL do Tesseract que vai no pacote está documentada no THIRD-PARTY-NOTICES.md.
+"""Confere as licenças das DLLs do Tesseract que vão no pacote do Windows.
+
+1. Cada DLL precisa estar na tabela do THIRD-PARTY-NOTICES.md.
+2. Cada DLL precisa ter o texto da licença em LICENCAS/Tesseract/bibliotecas.
 
 Uso: python build/verificar_licencas_dlls.py PASTA_TESSERACT_DO_PACOTE [THIRD-PARTY-NOTICES.md]
 
@@ -23,6 +26,19 @@ def main() -> int:
         print(f"FALHOU: DLLs sem licença documentada em {avisos.name}: {', '.join(faltando)}")
         return 1
     print(f"OK: todas as DLLs estão documentadas em {avisos.name}.")
+
+    # Textos completos das licenças, reunidos no build por build/licencas_windows.py
+    indice = pasta.parent / "LICENCAS" / "Tesseract" / "bibliotecas" / "_INDICE.md"
+    if not indice.is_file():
+        print(f"FALHOU: não há textos de licença das DLLs no pacote ({indice} não existe).")
+        return 1
+    conteudo = indice.read_text(encoding="utf-8").lower()
+    sem_texto = [d for d in dlls if d.lower() not in conteudo]
+    if sem_texto or "sem texto de licença" in conteudo:
+        print(f"FALHOU: DLLs sem texto de licença em {indice.name}: {', '.join(sem_texto) or 'veja o índice'}")
+        return 1
+    arquivos = [f for f in indice.parent.rglob("*") if f.is_file() and f.name != "_INDICE.md"]
+    print(f"OK: textos de licença de todas as DLLs no pacote ({len(arquivos)} arquivos).")
     return 0
 
 
