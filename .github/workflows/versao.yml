@@ -58,9 +58,21 @@ jobs:
         shell: pwsh
         run: powershell -ExecutionPolicy Bypass -File build\build_portatil.ps1 -Versao $env:VERSAO
 
+      - name: Remover o Tesseract do sistema (testar só com o que vai no pacote)
+        shell: pwsh
+        run: |
+          # Com o Tesseract do Chocolatey instalado, o Windows achava nele uma DLL que faltava
+          # no pacote e o teste passava; foi assim que a 1.2.0 e a 1.3.0 saíram sem OCR.
+          choco uninstall tesseract -y --no-progress
+          $global:LASTEXITCODE = 0
+          Remove-Item -Recurse -Force "C:\Program Files\Tesseract-OCR", .\Tesseract-OCR -ErrorAction SilentlyContinue
+          if (Test-Path "C:\Program Files\Tesseract-OCR\tesseract.exe") { throw "O Tesseract do sistema ainda está instalado" }
+          Write-Output "Tesseract do sistema removido."
+
       - name: Testar a versão portátil (.zip)
         shell: pwsh
         run: |
+          if (Get-Command tesseract -ErrorAction SilentlyContinue) { throw "Ainda há um tesseract no PATH" }
           Expand-Archive "dist\Conversor-Markdown-v$env:VERSAO-windows-x64.zip" -DestinationPath teste_zip
           .\.venv\Scripts\python.exe build\testar_pacote.py "teste_zip\Conversor Markdown\Conversor Markdown.exe" --janela
 
@@ -83,6 +95,10 @@ jobs:
           if (Test-Path "$pasta\Conversor Markdown.exe") { throw "Desinstalação deixou o programa para trás" }
           if (Test-Path "$env:APPDATA\Conversor Markdown") { throw "Desinstalação deixou as preferências para trás" }
           Write-Output "Instalar e desinstalar: OK"
+
+      - name: Licenças das DLLs incluídas
+        shell: pwsh
+        run: .\.venv\Scripts\python.exe build\verificar_licencas_dlls.py "teste_zip\Conversor Markdown\Tesseract-OCR"
 
       - uses: actions/upload-artifact@v7
         with:

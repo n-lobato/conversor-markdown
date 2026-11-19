@@ -36,30 +36,33 @@ $app = "$tmp\dist\Conversor Markdown"
 Write-Host "2/5 Copiando o Tesseract (somente o necessario para o OCR)..."
 $t = "$app\Tesseract-OCR"
 New-Item -ItemType Directory -Force "$t\tessdata" | Out-Null
-$dlls = 'libarchive-13.dll', 'libb2-1.dll', 'libbz2-1.dll', 'libcrypto-3-x64.dll', 'libdeflate.dll',
-        'libexpat-1.dll', 'libgcc_s_seh-1.dll', 'libgif-7.dll', 'libiconv-2.dll', 'libjbig-0.dll',
-        'libjpeg-8.dll', 'libleptonica-6.dll', 'libLerc.dll', 'liblz4.dll', 'liblzma-5.dll',
-        'libopenjp2-7.dll', 'libpng16-16.dll', 'libsharpyuv-0.dll', 'libstdc++-6.dll',
-        'libtesseract-5.dll', 'libtiff-6.dll', 'libwebp-7.dll', 'libwebpmux-3.dll',
-        'libwinpthread-1.dll', 'libzstd.dll', 'zlib1.dll'
 Copy-Item "$tess\tesseract.exe" $t
-# lista enxuta das bibliotecas usadas pelo OCR; versoes novas do Tesseract podem mudar nomes
-foreach ($d in $dlls) {
-    if (Test-Path "$tess\$d") { Copy-Item "$tess\$d" $t } else { Write-Host "    (nao encontrada: $d)" }
-}
+# Descobre as DLLs lendo as importacoes do tesseract.exe e de cada DLL (recursivo).
+# A lista fixa que havia aqui deixou de fora a libcurl-4.dll e quebrou o OCR da 1.2.0 e da 1.3.0.
+$ErrorActionPreference = 'Continue'
+$dlls = & $py build\dependencias_windows.py $tess tesseract.exe
+$codigo = $LASTEXITCODE
+$ErrorActionPreference = 'Stop'
+if ($codigo -ne 0 -or -not $dlls) { throw "Nao foi possivel listar as DLLs do Tesseract." }
+foreach ($d in $dlls) { Copy-Item "$tess\$d" $t }
+Write-Host ("    {0} DLLs: {1}" -f @($dlls).Count, ($dlls -join ', '))
 Copy-Item "$tess\tessdata\eng.traineddata", "$tess\tessdata\por.traineddata" "$t\tessdata"
 foreach ($c in 'configs', 'tessconfigs') {
     if (Test-Path "$tess\tessdata\$c") { Copy-Item -Recurse "$tess\tessdata\$c" "$t\tessdata\$c" }
 }
+# Testa ISOLADO: com o PATH reduzido ao Windows, para que DLLs de um Tesseract instalado
+# no sistema nao mascarem uma DLL que faltou na copia (foi o que escondeu o erro antes).
+$pathOriginal = $env:PATH
+$env:PATH = "$env:SystemRoot\System32;$env:SystemRoot"
 $ErrorActionPreference = 'Continue'
 $teste = & "$t\tesseract.exe" --list-langs 2>&1 | Out-String
-if ($teste -notmatch 'por') {
-    Write-Host "    A lista enxuta nao bastou; copiando todas as bibliotecas do Tesseract."
-    Copy-Item "$tess\*.dll" $t
-    $teste = & "$t\tesseract.exe" --list-langs 2>&1 | Out-String
-}
+$codigo = $LASTEXITCODE
 $ErrorActionPreference = 'Stop'
-if ($teste -notmatch 'por') { throw "Tesseract copiado nao funcionou: $teste" }
+$env:PATH = $pathOriginal
+if ($codigo -ne 0 -or $teste -notmatch 'por') {
+    throw ("Tesseract copiado nao funcionou sozinho (codigo {0}; -1073741515 = falta DLL): {1}" -f $codigo, $teste)
+}
+Write-Host "    Tesseract da pasta funciona sozinho (portugues disponivel)."
 
 Write-Host "3/5 Reunindo licencas..."
 $lic = "$app\LICENCAS"
@@ -68,6 +71,7 @@ Copy-Item LICENSE "$lic\LICENSE-Conversor-Markdown-AGPL-3.0.txt"
 Copy-Item THIRD-PARTY-NOTICES.md $lic
 Copy-Item anonimizador\LICENSE-GPL-3.0.txt "$lic\LICENSE-motor-Anonimizador-LGPD-GPL-3.0.txt"
 Copy-Item "$tess\doc\LICENSE" "$lic\Tesseract\LICENSE.txt"
+$dlls | Out-File -Encoding utf8 "$lic\Tesseract\DLLS-INCLUIDAS.txt"
 if (Test-Path "$tess\doc\AUTHORS") { Copy-Item "$tess\doc\AUTHORS" "$lic\Tesseract\AUTHORS.txt" }
 $base = (& $py -c "import sys; print(sys.base_prefix)").Trim()
 Copy-Item "$base\LICENSE.txt" "$lic\Python-e-TclTk\Python-LICENSE.txt"

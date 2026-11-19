@@ -44,7 +44,7 @@ Os binários para Windows vêm da compilação da
 feita sobre pacotes do [MSYS2](https://packages.msys2.org), onde está o código-fonte
 de cada biblioteca abaixo.
 
-O pacote para Windows (portátil e instalador) leva apenas as DLLs que o `tesseract.exe` realmente usa:
+O pacote para Windows (portátil e instalador) leva apenas as DLLs que o `tesseract.exe` realmente usa. Desde a versão 1.3.1, elas são descobertas automaticamente pelo build (`build/dependencias_windows.py`), a lista exata de cada pacote fica em `LICENCAS\Tesseract\DLLS-INCLUIDAS.txt`, e o build falha se alguma DLL incluída não estiver nesta tabela:
 
 | Biblioteca | Arquivo | Licença |
 | --- | --- | --- |
