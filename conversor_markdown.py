@@ -40,7 +40,7 @@ if getattr(sys, "frozen", False):
 else:
     APP_DIR = Path(__file__).resolve().parent
 
-VERSAO = "1.3.2"
+VERSAO = "1.3.3"
 SUFIXO_ANONIMIZADO = "_anonimizado"
 
 # no .exe sem console, stdout/stderr nao existem; evita erro de bibliotecas que imprimem
@@ -677,9 +677,8 @@ def abrir_janela(entradas_iniciais=None):
     ocr_var = tk.BooleanVar(value=prefs["ocr"])
     sub_var = tk.BooleanVar(value=prefs["subpastas"])
     sobre_var = tk.BooleanVar(value=False)  # nunca é lembrada (ver preferencias.py)
-    auto_var = tk.BooleanVar(value=prefs["auto"])
     anon_var = tk.BooleanVar(value=prefs["anonimizar"])
-    opcoes_lembradas = {"ocr": ocr_var, "subpastas": sub_var, "auto": auto_var, "anonimizar": anon_var}
+    opcoes_lembradas = {"ocr": ocr_var, "subpastas": sub_var, "anonimizar": anon_var}
 
     def guardar_opcoes(*_):
         preferencias.salvar({k: v.get() for k, v in opcoes_lembradas.items()})
@@ -727,6 +726,10 @@ def abrir_janela(entradas_iniciais=None):
         definir_saida_padrao(entradas)
         if iniciar:
             converter()
+        else:
+            n = sum(1 for f, _ in listar_arquivos(entradas, sub_var.get()) if f.suffix.lower() in SUPORTADAS)
+            status.configure(text=f"{n} arquivo(s) pronto(s). Confira as opções e clique em Converter.")
+            btn_converter.focus_set()
 
     def escolher_pasta_entrada():
         p = filedialog.askdirectory(title="Pasta com os arquivos a converter")
@@ -762,9 +765,6 @@ def abrir_janela(entradas_iniciais=None):
     opc2.grid(row=5, column=0, columnspan=4, sticky="w", pady=(0, 10))
     ttk.Checkbutton(opc2, text="Anonimizar dados pessoais (com revisão antes de salvar)",
                     variable=anon_var).pack(side="left")
-    if tem_dnd:
-        ttk.Checkbutton(opc2, text="Converter automaticamente ao soltar arquivos",
-                        variable=auto_var).pack(side="left", padx=14)
 
     barra = ttk.Progressbar(frm, mode="determinate")
     barra.grid(row=6, column=0, columnspan=4, sticky="ew")
@@ -878,7 +878,8 @@ def abrir_janela(entradas_iniciais=None):
         def ao_soltar(evento):
             area.configure(bg=cor_normal)
             caminhos = list(raiz.tk.splitlist(evento.data))
-            carregar(caminhos, iniciar=auto_var.get())
+            # soltar na janela só carrega: a pessoa confere as opções e clica em Converter
+            carregar(caminhos, iniciar=False)
             return evento.action
 
         def ao_entrar(evento):

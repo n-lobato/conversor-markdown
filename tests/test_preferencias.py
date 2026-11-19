@@ -49,3 +49,13 @@ def test_variavel_de_ambiente_troca_o_caminho(tmp_path, monkeypatch):
     destino = tmp_path / "prefs.json"
     monkeypatch.setenv("CONVERSOR_MARKDOWN_PREFERENCIAS", str(destino))
     assert preferencias.arquivo() == destino
+
+
+def test_opcao_antiga_de_converter_ao_soltar_e_ignorada(tmp_path):
+    # até a 1.3.2 havia "auto" (converter ao soltar); quem atualizar não pode quebrar
+    arq = tmp_path / "preferencias.json"
+    arq.write_text('{"auto": true, "ocr": false}', encoding="utf-8")
+    prefs = preferencias.carregar(arq)
+    assert "auto" not in prefs and prefs["ocr"] is False
+    preferencias.salvar(prefs, arq)
+    assert "auto" not in arq.read_text(encoding="utf-8")

@@ -24,10 +24,10 @@ mesmo". Isso acontece com programas que não têm assinatura digital
 comercial.
 
 COMO USAR
-Jeito mais rápido: arraste arquivos ou pastas para dentro da janela.
-A conversão começa sozinha (dá para desligar na opção "Converter
-automaticamente ao soltar arquivos"). Também funciona arrastar os
-arquivos direto sobre o "Conversor Markdown.exe" ou sobre o atalho dele.
+Jeito mais rápido: arraste arquivos ou pastas para dentro da janela,
+confira as opções e clique em "Converter". Também funciona arrastar os
+arquivos direto sobre o "Conversor Markdown.exe" ou sobre o atalho dele:
+nesse caso a janela abre e a conversão já começa.
 
 Pelos botões:
 1. Em "Origem", clique em "Pasta..." para converter uma pasta inteira,

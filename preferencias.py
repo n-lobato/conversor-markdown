@@ -21,7 +21,8 @@ import sys
 from pathlib import Path
 
 # anonimizar vem ligado: quem desliga é que precisa decidir isso de propósito
-PADRAO = {"ocr": True, "subpastas": True, "auto": True, "anonimizar": True}
+# "auto" (converter ao soltar arquivos) existiu até a 1.3.2 e é ignorado se ainda estiver no arquivo
+PADRAO = {"ocr": True, "subpastas": True, "anonimizar": True}
 
 
 def arquivo():

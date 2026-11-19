@@ -4,11 +4,11 @@
 
 | Sistema | Arquivo |
 | --- | --- |
-| **Windows 10 e 11** (recomendado) | [Instalador](https://github.com/n-lobato/conversor-markdown/releases/latest/download/Conversor-Markdown-v1.3.2-windows-x64-instalador.exe) |
-| Windows, versão portátil (pen drive) | [.zip](https://github.com/n-lobato/conversor-markdown/releases/latest/download/Conversor-Markdown-v1.3.2-windows-x64.zip) |
-| **Mac** com chip Apple, macOS 15.8.1 ou mais novo | [.dmg](https://github.com/n-lobato/conversor-markdown/releases/latest/download/Conversor-Markdown-v1.3.2-mac-apple-silicon.dmg) |
-| **Linux** Ubuntu, Debian, Mint | [.deb](https://github.com/n-lobato/conversor-markdown/releases/latest/download/conversor-markdown_1.3.2_amd64.deb) |
-| Outras distribuições Linux | [.tar.gz](https://github.com/n-lobato/conversor-markdown/releases/latest/download/Conversor-Markdown-v1.3.2-linux-x64.tar.gz) |
+| **Windows 10 e 11** (recomendado) | [Instalador](https://github.com/n-lobato/conversor-markdown/releases/latest/download/Conversor-Markdown-v1.3.3-windows-x64-instalador.exe) |
+| Windows, versão portátil (pen drive) | [.zip](https://github.com/n-lobato/conversor-markdown/releases/latest/download/Conversor-Markdown-v1.3.3-windows-x64.zip) |
+| **Mac** com chip Apple, macOS 15.8.1 ou mais novo | [.dmg](https://github.com/n-lobato/conversor-markdown/releases/latest/download/Conversor-Markdown-v1.3.3-mac-apple-silicon.dmg) |
+| **Linux** Ubuntu, Debian, Mint | [.deb](https://github.com/n-lobato/conversor-markdown/releases/latest/download/conversor-markdown_1.3.3_amd64.deb) |
+| Outras distribuições Linux | [.tar.gz](https://github.com/n-lobato/conversor-markdown/releases/latest/download/Conversor-Markdown-v1.3.3-linux-x64.tar.gz) |
 
 Todos os arquivos também estão na página de [Releases](https://github.com/n-lobato/conversor-markdown/releases/latest). Como instalar em cada sistema está na seção [Instalar](#instalar).
 
@@ -26,7 +26,7 @@ Muitos conversores online pedem o upload do documento. Para contratos, processos
 
 - Converte **PDF** (inclusive escaneado, com OCR), **Word (.docx)**, **PowerPoint (.pptx)**, **Excel (.xlsx, .xlsm, .xls)**, **CSV** e **imagens** (PNG, JPG, TIF, BMP, GIF, WEBP).
 - **Em lote:** uma pasta inteira, com subpastas, mantendo a mesma estrutura na saída.
-- **Arrastar e soltar:** solte arquivos ou pastas na janela, ou em cima do ícone, e a conversão começa.
+- **Arrastar e soltar:** solte arquivos ou pastas na janela, confira as opções e clique em **Converter**. Soltar em cima do ícone do programa abre a janela e já começa a conversão.
 - **OCR em português e inglês** para imagens, PDFs escaneados e figuras dentro de Word e PowerPoint.
 - Preserva títulos, listas, negrito, tabelas e notas do apresentador.
 - Se um arquivo falhar, os outros continuam. Os erros ficam registrados num log.
@@ -36,7 +36,7 @@ Muitos conversores online pedem o upload do documento. Para contratos, processos
 
 ### Windows
 
-**Instalador (recomendado).** Baixe o `Conversor-Markdown-v1.3.2-windows-x64-instalador.exe` e abra. Ele instala só para o seu usuário, sem pedir senha de administrador, cria o atalho no menu Iniciar (e, se quiser, na Área de Trabalho) e aparece em **Configurações > Aplicativos > Aplicativos instalados**. É por lá que se desinstala. Para atualizar, basta rodar o instalador da versão nova.
+**Instalador (recomendado).** Baixe o `Conversor-Markdown-v1.3.3-windows-x64-instalador.exe` e abra. Ele instala só para o seu usuário, sem pedir senha de administrador, cria o atalho no menu Iniciar (e, se quiser, na Área de Trabalho) e aparece em **Configurações > Aplicativos > Aplicativos instalados**. É por lá que se desinstala. Para atualizar, basta rodar o instalador da versão nova.
 
 **Versão portátil.** Baixe o `.zip`, clique com o botão direito em **Extrair tudo** e abra `Conversor Markdown.exe` dentro da pasta extraída. Não instala nada, então serve para levar num pen drive. Para remover, apague a pasta.
 
@@ -54,7 +54,7 @@ Macs com processador Intel ou com macOS mais antigo ainda não têm pacote pront
 
 ### Linux
 
-**Ubuntu, Debian, Mint e derivados:** baixe o `.deb` e rode `sudo apt install ./conversor-markdown_1.3.2_amd64.deb`. O Tesseract (OCR) em português é instalado junto. O programa aparece no menu de aplicativos. Para remover: `sudo apt remove conversor-markdown`.
+**Ubuntu, Debian, Mint e derivados:** baixe o `.deb` e rode `sudo apt install ./conversor-markdown_1.3.3_amd64.deb`. O Tesseract (OCR) em português é instalado junto. O programa aparece no menu de aplicativos. Para remover: `sudo apt remove conversor-markdown`.
 
 **Outras distribuições:** extraia o `.tar.gz` e rode `./instalar.sh` dentro da pasta. Ele instala só para o seu usuário, sem sudo, e cria o atalho no menu. Para remover, `./desinstalar.sh`. Para o OCR, instale o Tesseract com português pelo gerenciador de pacotes da distribuição.
 
@@ -72,7 +72,7 @@ O código mostrado deve ser igual ao publicado. Se for diferente, não use o arq
 
 ## Como usar
 
-**Jeito rápido:** arraste arquivos ou pastas para dentro da janela. Se você não escolher onde salvar, os `.md` vão para uma pasta `markdown` ao lado dos originais.
+**Jeito rápido:** arraste arquivos ou pastas para dentro da janela e clique em **Converter**. Se você não escolher onde salvar, os `.md` vão para uma pasta `markdown` ao lado dos originais.
 
 **Pelos botões:** escolha a origem (pasta ou arquivos), a pasta de saída e clique em **Converter**.
 
@@ -81,7 +81,6 @@ Opções:
 - **Usar OCR:** lê texto de imagens e PDFs escaneados. Deixa a conversão mais lenta.
 - **Incluir subpastas.**
 - **Sobrescrever .md existentes:** se desmarcado, arquivos já convertidos são pulados.
-- **Converter automaticamente ao soltar arquivos.**
 - **Anonimizar dados pessoais:** vem marcada. Veja a seção seguinte.
 
 O programa lembra essas escolhas para a próxima vez, menos "Sobrescrever", que sempre volta desmarcada para evitar que um arquivo seja trocado sem querer. Só as caixas de marcar são guardadas, nunca pastas ou nomes de arquivos. Elas ficam em `%APPDATA%\Conversor Markdown` no Windows, em `~/Library/Application Support/Conversor Markdown` no Mac e em `~/.config/conversor-markdown` no Linux.
@@ -150,9 +149,9 @@ Os pacotes publicados em Releases são gerados e testados pelo GitHub Actions (`
 
 Para gerar no próprio computador (sempre com o ambiente criado acima e `pip install -r requirements-dev.txt`):
 
-- **Windows** (`.zip` e instalador): coloque o Tesseract na pasta `Tesseract-OCR`, na raiz do projeto, com o [`por.traineddata`](https://github.com/tesseract-ocr/tessdata/raw/main/por.traineddata) em `Tesseract-OCR\tessdata`. Instale o [Inno Setup 6](https://jrsoftware.org/isinfo.php) e rode `powershell -ExecutionPolicy Bypass -File build\build_portatil.ps1 -Versao 1.3.2`. Sem o Inno Setup, acrescente `-SemInstalador`.
-- **Mac** (`.dmg`): `brew install tesseract dylibbundler` e depois `bash build/build_mac.sh 1.3.2`. O Tesseract e as bibliotecas dele vão para dentro do aplicativo.
-- **Linux** (`.deb` e `.tar.gz`): `bash build/build_linux.sh 1.3.2`. O OCR usa o Tesseract do sistema.
+- **Windows** (`.zip` e instalador): coloque o Tesseract na pasta `Tesseract-OCR`, na raiz do projeto, com o [`por.traineddata`](https://github.com/tesseract-ocr/tessdata/raw/main/por.traineddata) em `Tesseract-OCR\tessdata`. Instale o [Inno Setup 6](https://jrsoftware.org/isinfo.php) e rode `powershell -ExecutionPolicy Bypass -File build\build_portatil.ps1 -Versao 1.3.3`. Sem o Inno Setup, acrescente `-SemInstalador`.
+- **Mac** (`.dmg`): `brew install tesseract dylibbundler` e depois `bash build/build_mac.sh 1.3.3`. O Tesseract e as bibliotecas dele vão para dentro do aplicativo.
+- **Linux** (`.deb` e `.tar.gz`): `bash build/build_linux.sh 1.3.3`. O OCR usa o Tesseract do sistema.
 
 Tudo sai na pasta `dist`. `python build/testar_pacote.py CAMINHO_DO_EXECUTAVEL` testa um pacote pronto (conversão, OCR e anonimização).
 
