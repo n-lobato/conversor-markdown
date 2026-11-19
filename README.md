@@ -2,6 +2,8 @@
 
 ![Conversor Markdown](docs/social-preview.png)
 
+> **Qual programa usar?** Precisa do **texto** do documento para usar com IA, guardar ou pesquisar, com ou sem os dados pessoais? Use este, o Conversor Markdown. Precisa do **próprio documento anonimizado**, em Word ou PDF com a mesma aparência do original (por exemplo, uma petição tarjada para enviar a alguém)? Use o [Anonimizador LGPD](https://github.com/n-lobato/anonimizador-lgpd). Os dois usam o mesmo motor de detecção de dados pessoais.
+
 ## Baixar
 
 | Sistema | Arquivo |
