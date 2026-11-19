@@ -1,5 +1,7 @@
 # Conversor Markdown
 
+![Conversor Markdown](docs/social-preview.png)
+
 ## Baixar
 
 | Sistema | Arquivo |
@@ -14,7 +16,7 @@ Todos os arquivos também estão na página de [Releases](https://github.com/n-l
 
 > **Atenção:** não use o botão verde **Code > Download ZIP**. Ele baixa só o código-fonte, que não roda sem Python instalado.
 
-Programa para Windows, Mac e Linux que converte PDF, Word, PowerPoint, Excel, CSV e imagens em Markdown, em lote, **sem enviar nada para a internet**. Tudo roda no próprio computador, inclusive o OCR.
+Programa para Windows, Mac e Linux que converte PDF, Word, PowerPoint, Excel, CSV e imagens em Markdown, em lote, **sem enviar nada para a internet**. Tudo roda no próprio computador, inclusive o OCR. Antes de salvar, ele também **anonimiza dados pessoais** (nomes, CPF, endereços e outros), com uma tela para você revisar.
 
 Feito para quem precisa preparar documentos para ferramentas de IA, bases de conhecimento ou anotações, mas não quer (ou não pode) subir arquivos para serviços online.
 
