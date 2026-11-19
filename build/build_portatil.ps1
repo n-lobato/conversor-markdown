@@ -77,7 +77,8 @@ if (Test-Path "$tess\doc\AUTHORS") { Copy-Item "$tess\doc\AUTHORS" "$lic\Tessera
 # No GitHub Actions (CI) e obrigatorio; num build local sem MSYS2 so avisa.
 $msys = if ($env:MSYS2_ROOT) { $env:MSYS2_ROOT } else { 'C:\msys64' }
 if (Test-Path "$msys\usr\bin\bash.exe") {
-    $argsLic = @('build\licencas_windows.py', '--msys', $msys, '--destino', "$lic\Tesseract\bibliotecas")
+    $argsLic = @('build\licencas_windows.py', '--msys', $msys, '--destino', "$lic\Tesseract\bibliotecas",
+                 '--tesseract-licenca', "$tess\doc\LICENSE")
     if ($env:CI) { $argsLic += '--obrigatorio' }
     $ErrorActionPreference = 'Continue'
     & $py @argsLic @dlls

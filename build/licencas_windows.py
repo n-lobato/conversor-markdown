@@ -31,7 +31,7 @@ from pathlib import Path
 
 PREFIXO = "mingw-w64-x86_64-"
 REPO = "mingw64"
-NOME_LICENCA = re.compile(r"^(copying|licen[cs]e|copyright|notice|unlicense|patents)([._-].*)?$", re.I)
+NOME_LICENCA = re.compile(r"^(copying|licen[cs]e|copyright|notice|unlicense|patents)", re.I)  # COPYING, COPYINGv2, LICENSE.md...
 
 
 class Msys:
@@ -86,22 +86,73 @@ def arquivos_de_licenca(conteudo: list[str], pacote: str) -> list[str]:
     return [c for c in arquivos if curto in c and NOME_LICENCA.match(Path(c).name)]
 
 
+FONTES = "https://repo.msys2.org/mingw/sources"
+
+
+def licencas_do_codigo_fonte(msys: Msys, curto: str, versao: str, pasta: Path) -> list[str]:
+    """Baixa o pacote de código-fonte do MSYS2 e extrai os arquivos de licença do projeto.
+
+    Devolve caminhos relativos a ``pasta``. O pacote-fonte traz o PKGBUILD e o
+    arquivo original do projeto (.tar.gz, .tar.xz...), de onde saem os arquivos
+    de licença da raiz (e, se houver, os da pasta lib/, caso do lz4).
+    """
+    import urllib.request
+
+    nome = f"mingw-w64-{curto}-{versao}.src.tar.zst"
+    destino_arq = pasta / nome
+    with urllib.request.urlopen(f"{FONTES}/{nome}", timeout=120) as r, open(destino_arq, "wb") as f:
+        shutil.copyfileobj(r, f)
+    pasta_p = msys.posix(pasta)
+    msys.rodar(f"bsdtar -xf '{pasta_p}/{nome}' -C '{pasta_p}'")
+    tarballs = [t for t in pasta.rglob("*") if t.is_file() and re.search(r"\.(tar\.(gz|xz|bz2|zst|lz)|tgz|zip)$", t.name)
+                and t.name != nome]
+    achados: list[str] = []
+    for t in tarballs:
+        t_p = msys.posix(t)
+        itens = [i for i in msys.rodar(f"bsdtar -tf '{t_p}'").splitlines() if i and not i.endswith("/")]
+        escolhidos = []
+        for i in itens:
+            partes = i.split("/")
+            if not NOME_LICENCA.match(partes[-1]):
+                continue
+            if len(partes) == 2 or (len(partes) == 3 and partes[1] == "lib"):
+                escolhidos.append(i)
+        if escolhidos:
+            saida = pasta / "x"
+            saida.mkdir(exist_ok=True)
+            lista = " ".join(f"'{i}'" for i in escolhidos)
+            msys.rodar(f"bsdtar -xf '{t_p}' -C '{msys.posix(saida)}' {lista}")
+            achados += [f"x/{i}" for i in escolhidos]
+    return achados
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--destino", required=True, type=Path)
     ap.add_argument("--msys", default=os.environ.get("MSYS2_ROOT", r"C:\msys64"), type=Path)
     ap.add_argument("--obrigatorio", action="store_true")
+    ap.add_argument("--tesseract-licenca", type=Path,
+                    help="LICENSE do Tesseract (a libtesseract é compilada pela UB Mannheim, não vem do MSYS2)")
     ap.add_argument("dlls", nargs="+")
     a = ap.parse_args()
 
     msys = Msys(a.msys)
     print("    Atualizando os índices do MSYS2...")
     msys.rodar("pacman -Sy --noconfirm >/dev/null && pacman -Fy --noconfirm >/dev/null")
-    pacotes, sem_pacote = pacotes_das_dlls(msys, a.dlls)
+    tess_dlls = [d for d in a.dlls if d.lower().startswith("libtesseract")]
+    outras = [d for d in a.dlls if d not in tess_dlls]
+    pacotes, sem_pacote = pacotes_das_dlls(msys, outras)
 
     a.destino.mkdir(parents=True, exist_ok=True)
     problemas = [f"{d}: nenhum pacote do MSYS2 ({REPO}) contém esta DLL" for d in sem_pacote]
     linhas = []
+    if tess_dlls:
+        if a.tesseract_licenca and a.tesseract_licenca.is_file():
+            (a.destino / "tesseract").mkdir(exist_ok=True)
+            shutil.copy2(a.tesseract_licenca, a.destino / "tesseract" / "LICENSE.txt")
+            linhas.append(f"| tesseract (UB Mannheim) | - | {', '.join(tess_dlls)} | tesseract/LICENSE.txt |")
+        else:
+            problemas += [f"{d}: informe --tesseract-licenca" for d in tess_dlls]
     with tempfile.TemporaryDirectory() as tmp:
         cache, extraido = Path(tmp) / "cache", Path(tmp) / "x"
         cache.mkdir()
@@ -120,23 +171,35 @@ def main() -> int:
             arq_p = f"{cache_p}/{arquivo.name}"
             conteudo = msys.rodar(f"bsdtar -tf '{arq_p}'").splitlines()
             licencas = arquivos_de_licenca(conteudo, pacote)
-            if not licencas:
-                problemas.append(f"{pacote}: o pacote não traz arquivo de licença")
-                continue
-            lista = " ".join(f"'{c}'" for c in licencas)
-            msys.rodar(f"bsdtar -xf '{arq_p}' -C '{extraido_p}' {lista}")
+            base_extracao = extraido
+            fonte = ""
+            if licencas:
+                lista = " ".join(f"'{c}'" for c in licencas)
+                msys.rodar(f"bsdtar -xf '{arq_p}' -C '{extraido_p}' {lista}")
+            else:
+                # o pacote binário não traz licença: busca no código-fonte da mesma versão
+                base_extracao = Path(tmp) / f"fonte-{curto}"
+                base_extracao.mkdir()
+                try:
+                    licencas = licencas_do_codigo_fonte(msys, curto, info["versao"], base_extracao)
+                    fonte = " (do código-fonte)"
+                except Exception as e:  # rede, formato inesperado etc.
+                    print(f"    falha ao ler o código-fonte de {curto}: {e}")
+                if not licencas:
+                    problemas.append(f"{pacote}: sem arquivo de licença no pacote nem no código-fonte")
+                    continue
             pasta = a.destino / curto
             pasta.mkdir(exist_ok=True)
             copiados = []
             for c in licencas:
-                origem = extraido / c
+                origem = base_extracao / c
                 nome = origem.name
-                if (pasta / nome).exists():  # dois arquivos com o mesmo nome em pastas diferentes
-                    nome = c.split("/", 3)[-1].replace("/", "_")
+                if (pasta / nome).exists():  # mesmo nome em pastas diferentes (ex.: LICENSE e lib/LICENSE)
+                    nome = f"{origem.parent.name}_{origem.name}"
                 shutil.copy2(origem, pasta / nome)
                 copiados.append(nome)
             linhas.append(f"| {curto} | {info['versao']} | {', '.join(sorted(info['dlls'], key=str.lower))} "
-                          f"| {', '.join(f'{curto}/{n}' for n in copiados)} |")
+                          f"| {', '.join(f'{curto}/{n}' for n in copiados)}{fonte} |")
 
     indice = [
         "# Textos de licença das bibliotecas do Tesseract (Windows)",
