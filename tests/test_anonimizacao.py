@@ -186,3 +186,35 @@ def test_janela_principal_tem_a_opcao(tmp_path, monkeypatch):
     assert criadas[0].marcadas[chave] is True, "a anonimização deve vir marcada por padrão"
     assert criadas[2].marcadas[chave] is False, "a escolha do usuário deve ser lembrada"
     assert criadas[2].marcadas["Sobrescrever .md existentes"] is False
+
+
+def test_nome_do_arquivo_tambem_e_anonimizado(tmp_path):
+    # o conteúdo era anonimizado, mas "laudo_maria_aparecida_de_souza_anonimizado.md" entregava o nome
+    origem = tmp_path / "Clientes" / "Maria Aparecida de Souza"
+    origem.mkdir(parents=True)
+    (origem / "laudo_maria_aparecida_de_souza.csv").write_text(CSV, encoding="utf-8")
+    (origem / "outro.csv").write_text("Coluna\nsem dados pessoais\n", encoding="utf-8")
+    saida = tmp_path / "saida"
+    logs = []
+    ok, _, falhas = cm.converter_lote([origem], saida, usar_ocr=False, log=logs.append, anonimizar=True)
+    assert (ok, falhas) == (2, 0)
+    nomes = sorted(p.name for p in saida.rglob("*.md"))
+    assert nomes == ["laudo_PESSOA_1_anonimizado.md", "outro_anonimizado.md"]
+    assert "também foram anonimizados" in "\n".join(logs)
+    # rodar de novo sem sobrescrever: reconhece os arquivos já gravados e não duplica
+    ok, pulados, _ = cm.converter_lote([origem], saida, usar_ocr=False, log=lambda m: None, anonimizar=True)
+    assert (ok, pulados) == (0, 2)
+    assert len(list(saida.rglob("*.md"))) == 2
+
+
+def test_log_de_erros_sem_caminho_absoluto_nem_nome(tmp_path):
+    origem = tmp_path / "Processo de Maria Aparecida de Souza"
+    origem.mkdir()
+    (origem / "lista.csv").write_text(CSV, encoding="utf-8")
+    (origem / "quebrado.docx").write_bytes(b"isto nao e um docx")
+    saida = tmp_path / "saida"
+    _, _, falhas = cm.converter_lote([origem], saida, usar_ocr=False, log=lambda m: None, anonimizar=True)
+    assert falhas == 1
+    log = (saida / "_erros_conversao.log").read_text(encoding="utf-8")
+    assert "quebrado.docx" in log
+    assert str(tmp_path) not in log and "Maria" not in log

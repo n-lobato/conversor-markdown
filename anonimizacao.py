@@ -11,6 +11,7 @@ código ([PESSOA_1], [CPF_1]...). A mesma pessoa recebe o mesmo código em todos
 arquivos do lote.
 """
 
+import re
 from collections import Counter
 
 from anonimizador import __version__ as VERSAO_MOTOR  # noqa: F401
@@ -77,3 +78,22 @@ class Anonimizacao:
     def aplicar(self, texto):
         self.registro.numerar()
         return Substituidor(self.registro, GLOBAL).substituir(texto)
+
+    def aplicar_nome(self, nome):
+        """Troca os dados pessoais já encontrados no nome de um arquivo (sem a extensão).
+
+        "laudo_joao_carlos_silva" vira "laudo_PESSOA_1". Sem colchetes, que atrapalham
+        em nomes de arquivo; "_", "-" e "." contam como espaço na busca. Se nada for
+        encontrado, devolve o nome como estava."""
+        self.registro.numerar()
+        espacado = re.sub(r"[_\-.]+", " ", nome)
+        trechos = Substituidor(self.registro, GLOBAL).trechos(espacado, colchetes=False)
+        if not trechos:
+            return nome
+        partes, pos = [], 0
+        for ini, fim, codigo in trechos:
+            partes.append(espacado[pos:ini])
+            partes.append(codigo)
+            pos = fim
+        partes.append(espacado[pos:])
+        return re.sub(r"\s+", "_", "".join(partes).strip())

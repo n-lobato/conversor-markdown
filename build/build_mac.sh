@@ -13,7 +13,12 @@ TMP="$(mktemp -d)"
 APP="$TMP/dist/Conversor Markdown.app"
 ARQ="$(uname -m)"
 [ "$ARQ" = "arm64" ] && NOME_ARQ="apple-silicon" || NOME_ARQ="intel"
-TESSDATA_URL="https://github.com/tesseract-ocr/tessdata/raw/main"
+# Dados do OCR numa versão fixa (commit de 09/03/2024 do tesseract-ocr/tessdata), com o
+# SHA-256 conferido: se o arquivo baixado não for exatamente esse, o build para.
+TESSDATA_COMMIT="ced78752cc61322fb554c280d13360b35b8684e4"
+TESSDATA_URL="https://github.com/tesseract-ocr/tessdata/raw/$TESSDATA_COMMIT"
+SHA_por="016c6a371bb1e4c48fe521908cf3ba3d751fade0ab846ad5d4086b563f5c528c"
+SHA_eng="daa0c97d651c19fba3b25e81317cd697e9908c8208090c94c3905381c23fc047"
 
 echo "1/6 Gerando o aplicativo..."
 "$PY" -m PyInstaller --noconfirm --clean --windowed --onedir --name "Conversor Markdown" \
@@ -36,7 +41,14 @@ dylibbundler -of -cd -b -x "$TESS/tesseract" -d "$TESS/libs" -p @executable_path
 if otool -L "$TESS/tesseract" "$TESS"/libs/*.dylib | grep -E "/opt/homebrew|/usr/local/(opt|Cellar)"; then
     echo "ERRO: o Tesseract ainda aponta para bibliotecas do Homebrew"; exit 1
 fi
-for l in eng por; do curl -fsSL -o "$DADOS/$l.traineddata" "$TESSDATA_URL/$l.traineddata"; done
+for l in eng por; do
+    curl -fsSL -o "$DADOS/$l.traineddata" "$TESSDATA_URL/$l.traineddata"
+    esperado="SHA_$l"
+    obtido="$(shasum -a 256 "$DADOS/$l.traineddata" | awk '{print $1}')"
+    if [ "$obtido" != "${!esperado}" ]; then
+        echo "ERRO: SHA-256 diferente do esperado em $l.traineddata ($obtido)"; exit 1
+    fi
+done
 cp -R "$(brew --prefix tesseract)/share/tessdata/configs" "$DADOS/" 2>/dev/null || true
 cp -R "$(brew --prefix tesseract)/share/tessdata/tessconfigs" "$DADOS/" 2>/dev/null || true
 codesign --force -s - "$TESS"/libs/*.dylib "$TESS/tesseract"

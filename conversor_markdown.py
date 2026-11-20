@@ -40,7 +40,7 @@ if getattr(sys, "frozen", False):
 else:
     APP_DIR = Path(__file__).resolve().parent
 
-VERSAO = "1.3.3"
+VERSAO = "1.3.4"
 SUFIXO_ANONIMIZADO = "_anonimizado"
 
 # no .exe sem console, stdout/stderr nao existem; evita erro de bibliotecas que imprimem
@@ -545,6 +545,8 @@ def converter_lote(entradas, pasta_saida, usar_ocr=True, subpastas=True, sobresc
         log(f"  Ignorado (formato antigo, salve como .docx/.pptx): {f.name}")
 
     usados = set()
+    erros = []  # (pasta de origem, texto): gravados no fim, já sem caminhos absolutos
+    anon = None
     pendentes = []  # (destino, markdown) quando há anonimização: grava só depois da revisão
     ok = falhas = pulados = 0
     inicio = time.time()
@@ -561,9 +563,10 @@ def converter_lote(entradas, pasta_saida, usar_ocr=True, subpastas=True, sobresc
         destino_dir = pasta_saida / rel
         sufixo = SUFIXO_ANONIMIZADO if anonimizar else ""
         destino = destino_dir / (arq.stem + sufixo + ".md")
-        if destino in usados:
+        # casefold: no Mac e no Windows, "Contrato.md" e "contrato.md" são o mesmo arquivo
+        if str(destino).casefold() in usados:
             destino = destino_dir / f"{arq.stem}_{arq.suffix.lstrip('.').lower()}{sufixo}.md"
-        usados.add(destino)
+        usados.add(str(destino).casefold())
 
         if destino.exists() and not sobrescrever:
             log(f"[{idx}/{len(validos)}] Pulado (ja existe): {destino.name}")
@@ -581,13 +584,27 @@ def converter_lote(entradas, pasta_saida, usar_ocr=True, subpastas=True, sobresc
         except Exception as e:  # noqa: BLE001
             falhas += 1
             log(f"    ERRO: {e}")
-            with open(pasta_saida / "_erros_conversao.log", "a", encoding="utf-8") as f:
-                f.write(f"\n[{datetime.now():%d/%m/%Y %H:%M}] {arq}\n{traceback.format_exc()}\n")
+            try:
+                nome_rel = arq.relative_to(base).as_posix()
+            except ValueError:
+                nome_rel = arq.name
+            erros.append((base, f"\n[{datetime.now():%d/%m/%Y %H:%M}] {nome_rel}\n{traceback.format_exc()}\n"))
 
     if anonimizar and pendentes and not (cancelar and cancelar()):
-        ok += gravar_anonimizados(pendentes, log, revisar)
+        gravados, ja_existiam, anon = gravar_anonimizados(pendentes, log, revisar, sobrescrever)
+        ok += gravados
+        pulados += ja_existiam
     elif anonimizar and pendentes:
         log("Nada foi salvo: a conversão foi interrompida antes da anonimização.")
+
+    if erros:
+        conteudo = "".join(t for _, t in erros)
+        for base in {b for b, _ in erros}:  # o caminho da pasta pode ter nome de cliente
+            conteudo = conteudo.replace(str(base), "[ORIGEM]")
+        if anon is not None:  # mesmos códigos dos arquivos anonimizados
+            conteudo = anon.aplicar(conteudo)
+        with open(pasta_saida / "_erros_conversao.log", "a", encoding="utf-8") as f:
+            f.write(conteudo)
 
     if progresso:
         progresso(len(validos), len(validos), "")
@@ -598,11 +615,13 @@ def converter_lote(entradas, pasta_saida, usar_ocr=True, subpastas=True, sobresc
     return ok, pulados, falhas
 
 
-def gravar_anonimizados(pendentes, log, revisar=None):
+def gravar_anonimizados(pendentes, log, revisar=None, sobrescrever=False):
     """Detecta os dados pessoais em todos os textos, pede a revisão e grava.
 
     Se algo falhar ou a revisão for cancelada, NADA é gravado: nunca sai um .md
-    com dados pessoais quando a anonimização foi pedida."""
+    com dados pessoais quando a anonimização foi pedida. O nome do arquivo também
+    é anonimizado ("laudo_joao_silva" vira "laudo_PESSOA_1").
+    Devolve (gravados, pulados porque já existiam, anonimização ou None)."""
     try:
         from anonimizacao import VERSAO_MOTOR, Anonimizacao
         log(f"\nProcurando dados pessoais em {len(pendentes)} arquivo(s) (motor do Anonimizador LGPD {VERSAO_MOTOR})...")
@@ -614,18 +633,36 @@ def gravar_anonimizados(pendentes, log, revisar=None):
             log("Aguardando a revisão...")
             if not revisar(anon):
                 log("Revisão cancelada: nenhum arquivo foi salvo.")
-                return 0
+                return 0, 0, None
         else:
             log("Atenção: anonimização sem revisão manual. Confira os arquivos antes de compartilhar.")
         saidas = [(d, anon.aplicar(md)) for d, md in pendentes]
     except Exception as e:  # noqa: BLE001
         log(f"ERRO na anonimização ({e}). Nenhum arquivo foi salvo.")
-        return 0
+        return 0, 0, None
+    gravados = ja_existiam = renomeados = 0
+    usados = set()
     for destino, texto in saidas:
-        destino.parent.mkdir(parents=True, exist_ok=True)
-        destino.write_text(texto, encoding="utf-8")
-    log(f"{len(saidas)} arquivo(s) anonimizado(s) salvos com o sufixo {SUFIXO_ANONIMIZADO}.")
-    return len(saidas)
+        original = destino.stem[:-len(SUFIXO_ANONIMIZADO)] if destino.stem.endswith(SUFIXO_ANONIMIZADO) else destino.stem
+        novo = anon.aplicar_nome(original)
+        renomeados += novo != original
+        alvo = destino.with_name(novo + SUFIXO_ANONIMIZADO + destino.suffix)
+        n = 2
+        while str(alvo).casefold() in usados:  # dois nomes que viraram o mesmo código
+            alvo = destino.with_name(f"{novo}_{n}{SUFIXO_ANONIMIZADO}{destino.suffix}")
+            n += 1
+        usados.add(str(alvo).casefold())
+        if alvo.exists() and not sobrescrever:
+            log(f"    Pulado (ja existe): {alvo.name}")
+            ja_existiam += 1
+            continue
+        alvo.parent.mkdir(parents=True, exist_ok=True)
+        alvo.write_text(texto, encoding="utf-8")
+        gravados += 1
+    log(f"{gravados} arquivo(s) anonimizado(s) salvos com o sufixo {SUFIXO_ANONIMIZADO}.")
+    if renomeados:
+        log(f"{renomeados} nome(s) de arquivo tinham dados pessoais e também foram anonimizados.")
+    return gravados, ja_existiam, anon
 
 
 # ----------------------------------------------------------------------------

@@ -260,3 +260,15 @@ def test_pdf_mantem_o_titulo_no_topo_da_pagina(tmp_path):
     assert "EXCELENTÍSSIMO SENHOR JUIZ DE DIREITO" in md
     assert "Dos fatos narrados pela autora." in md and "Dos pedidos finais e do valor da causa." in md
     assert "TRIBUNAL DE JUSTIÇA" not in md and "de 4" not in md
+
+
+def test_nomes_que_so_diferem_em_maiusculas_nao_se_sobrescrevem(tmp_path):
+    # no Mac e no Windows, Contrato.md e contrato.md seriam o mesmo arquivo
+    origem = tmp_path / "origem"
+    origem.mkdir()
+    (origem / "Contrato.csv").write_text("A;B\n1;2\n", encoding="utf-8")
+    (origem / "contrato.CSV").write_text("C;D\n3;4\n", encoding="utf-8")
+    saida = tmp_path / "saida"
+    ok, _, falhas = cm.converter_lote([origem], saida, usar_ocr=False, log=lambda m: None)
+    assert (ok, falhas) == (2, 0)
+    assert sorted(p.name for p in saida.glob("*.md")) == ["Contrato.md", "contrato_csv.md"]
