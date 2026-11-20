@@ -40,7 +40,7 @@ if getattr(sys, "frozen", False):
 else:
     APP_DIR = Path(__file__).resolve().parent
 
-VERSAO = "1.3.6"
+VERSAO = "1.3.7"
 SUFIXO_ANONIMIZADO = "_anonimizado"
 
 # no .exe sem console, stdout/stderr nao existem; evita erro de bibliotecas que imprimem
@@ -590,13 +590,13 @@ def converter_lote(entradas, pasta_saida, usar_ocr=True, subpastas=True, sobresc
                 nome_rel = arq.name
             detalhe = traceback.format_exc()
             if anonimizar:
-                # o log fica na pasta de saída, que pode ser compartilhada: com a anonimização
-                # ligada, o arquivo vira um rótulo neutro (o nome aparece só na janela)
-                rotulo = f"[arquivo {idx} de {len(validos)}, {arq.suffix.lower()}]"
-                ocultar = {str(arq), nome_rel, nome_rel.replace("/", "\\"), arq.name, arq.stem}
-                for trecho in sorted(ocultar, key=len, reverse=True):
-                    detalhe = detalhe.replace(trecho, rotulo)
-                nome_rel = rotulo
+                # O log fica na pasta de saída, que pode ser compartilhada. Com a anonimização
+                # ligada, ele não leva nome, caminho, mensagem nem detalhes técnicos, porque uma
+                # biblioteca pode citar uma pasta como "Cliente Maria Silva" na mensagem de erro:
+                # só um rótulo neutro e o tipo do erro. A mensagem completa aparece na janela.
+                nome_rel = f"[arquivo {idx} de {len(validos)}, {arq.suffix.lower()}]"
+                detalhe = (f"Erro: {type(e).__name__}. A mensagem completa aparece na janela do "
+                           "programa (não é gravada aqui por causa da anonimização).")
             erros.append((base, f"\n[{datetime.now():%d/%m/%Y %H:%M}] {nome_rel}\n{detalhe}\n"))
 
     if anonimizar and pendentes and not (cancelar and cancelar()):

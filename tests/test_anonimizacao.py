@@ -240,4 +240,5 @@ def test_log_de_erros_nao_expoe_nome_que_so_existe_no_arquivo(tmp_path):
     log = (saida / "_erros_conversao.log").read_text(encoding="utf-8")
     assert "Joao" not in log and "Silva" not in log
     assert "[arquivo 1 de 1, .docx]" in log
+    assert "Traceback" not in log  # sem detalhes técnicos que possam citar pastas
     assert any("Joao_da_Silva_contrato.docx" in m for m in logs)  # na janela, o nome continua visível

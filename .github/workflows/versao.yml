@@ -207,6 +207,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      id-token: write      # atestação de origem (Sigstore)
+      attestations: write
     steps:
       - uses: actions/checkout@v7
 
@@ -214,6 +216,18 @@ jobs:
         with:
           path: dist
           merge-multiple: true
+
+      # Registro criptográfico, verificável por qualquer pessoa, de que cada arquivo saiu
+      # deste workflow, a partir deste commit (gh attestation verify ARQUIVO --repo n-lobato/conversor-markdown).
+      - name: Atestação de origem dos pacotes
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4
+        with:
+          subject-path: |
+            dist/*.exe
+            dist/*.zip
+            dist/*.dmg
+            dist/*.deb
+            dist/*.tar.gz
 
       - name: Impressões digitais (SHA-256) e notas da versão
         run: |
@@ -243,7 +257,7 @@ jobs:
           {
             echo '```'
             echo
-            echo "Gerado pelo GitHub Actions a partir do código deste repositório."
+            echo "Gerado pelo GitHub Actions a partir do código deste repositório. Cada pacote tem atestação de origem, que comprova de qual build e commit ele saiu: veja https://github.com/n-lobato/conversor-markdown/attestations ou, com o GitHub CLI, rode \`gh attestation verify NOME_DO_ARQUIVO --repo n-lobato/conversor-markdown\`."
           } >> ../notas.md
           ls -la
           cat ../notas.md
