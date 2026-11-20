@@ -1,0 +1,14 @@
+# Verificação automática do código com o Ruff (https://docs.astral.sh/ruff/),
+# rodada no GitHub Actions a cada envio (workflow "Testes").
+# Só regras que apontam erros ou bugs prováveis; nenhuma regra de estilo.
+#   F    nomes não definidos, imports que não existem, variáveis sem uso
+#   E9   erros de sintaxe
+#   B    bugs comuns (argumento padrão mutável, exceção engolida etc.)
+#   PLE  erros detectados pelo Pylint
+# Para rodar localmente: pip install -r requirements-dev.txt e depois "ruff check ."
+
+[lint]
+select = ["F", "E9", "B", "PLE"]
+# zip() com listas de tamanhos diferentes é intencional nos dígitos verificadores
+# (ex.: PIS usa 10 pesos para 11 dígitos), então "strict=" não se aplica.
+ignore = ["B905"]

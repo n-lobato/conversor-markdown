@@ -19,6 +19,9 @@ jobs:
           python-version: "3.12"
       - name: Instalar dependências
         run: python -m pip install -r requirements-dev.txt
+      - name: Verificar erros no código (Ruff)
+        if: runner.os == 'Linux'
+        run: ruff check --output-format=github .
       - name: Testes (Windows e Mac, sem OCR; o OCR é testado no fluxo dos pacotes)
         if: runner.os != 'Linux'
         run: python -m pytest -v
