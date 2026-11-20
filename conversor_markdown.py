@@ -40,7 +40,7 @@ if getattr(sys, "frozen", False):
 else:
     APP_DIR = Path(__file__).resolve().parent
 
-VERSAO = "1.3.5"
+VERSAO = "1.3.6"
 SUFIXO_ANONIMIZADO = "_anonimizado"
 
 # no .exe sem console, stdout/stderr nao existem; evita erro de bibliotecas que imprimem
@@ -588,7 +588,16 @@ def converter_lote(entradas, pasta_saida, usar_ocr=True, subpastas=True, sobresc
                 nome_rel = arq.relative_to(base).as_posix()
             except ValueError:
                 nome_rel = arq.name
-            erros.append((base, f"\n[{datetime.now():%d/%m/%Y %H:%M}] {nome_rel}\n{traceback.format_exc()}\n"))
+            detalhe = traceback.format_exc()
+            if anonimizar:
+                # o log fica na pasta de saída, que pode ser compartilhada: com a anonimização
+                # ligada, o arquivo vira um rótulo neutro (o nome aparece só na janela)
+                rotulo = f"[arquivo {idx} de {len(validos)}, {arq.suffix.lower()}]"
+                ocultar = {str(arq), nome_rel, nome_rel.replace("/", "\\"), arq.name, arq.stem}
+                for trecho in sorted(ocultar, key=len, reverse=True):
+                    detalhe = detalhe.replace(trecho, rotulo)
+                nome_rel = rotulo
+            erros.append((base, f"\n[{datetime.now():%d/%m/%Y %H:%M}] {nome_rel}\n{detalhe}\n"))
 
     if anonimizar and pendentes and not (cancelar and cancelar()):
         gravados, ja_existiam, anon = gravar_anonimizados(pendentes, log, revisar, sobrescrever, pasta_saida)

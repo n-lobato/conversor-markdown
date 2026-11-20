@@ -222,5 +222,22 @@ def test_log_de_erros_sem_caminho_absoluto_nem_nome(tmp_path):
     _, _, falhas = cm.converter_lote([origem], saida, usar_ocr=False, log=lambda m: None, anonimizar=True)
     assert falhas == 1
     log = (saida / "_erros_conversao.log").read_text(encoding="utf-8")
-    assert "quebrado.docx" in log
+    assert "[arquivo 2 de 2, .docx]" in log  # rótulo neutro no lugar do nome
+    assert "quebrado" not in log
     assert str(tmp_path) not in log and "Maria" not in log
+
+
+def test_log_de_erros_nao_expoe_nome_que_so_existe_no_arquivo(tmp_path):
+    # arquivo que falhou e cujo nome não aparece em nenhum conteúdo: nada a detectar,
+    # então o log precisa esconder o nome por conta própria
+    origem = tmp_path / "origem"
+    origem.mkdir()
+    (origem / "Joao_da_Silva_contrato.docx").write_bytes(b"isto nao e um docx")
+    saida = tmp_path / "saida"
+    logs = []
+    _, _, falhas = cm.converter_lote([origem], saida, usar_ocr=False, log=logs.append, anonimizar=True)
+    assert falhas == 1
+    log = (saida / "_erros_conversao.log").read_text(encoding="utf-8")
+    assert "Joao" not in log and "Silva" not in log
+    assert "[arquivo 1 de 1, .docx]" in log
+    assert any("Joao_da_Silva_contrato.docx" in m for m in logs)  # na janela, o nome continua visível

@@ -38,9 +38,18 @@ jobs:
         run: |
           choco install tesseract innosetup -y --no-progress
           Copy-Item -Recurse "C:\Program Files\Tesseract-OCR" .\Tesseract-OCR
-          Invoke-WebRequest https://github.com/tesseract-ocr/tessdata/raw/main/por.traineddata -OutFile .\Tesseract-OCR\tessdata\por.traineddata
-          if (-not (Test-Path .\Tesseract-OCR\tessdata\eng.traineddata)) {
-            Invoke-WebRequest https://github.com/tesseract-ocr/tessdata/raw/main/eng.traineddata -OutFile .\Tesseract-OCR\tessdata\eng.traineddata
+          # Dados do OCR numa versão fixa (mesmo commit e SHA-256 do build do Mac);
+          # o build para se o arquivo baixado não for exatamente o esperado.
+          $commit = 'ced78752cc61322fb554c280d13360b35b8684e4'
+          $esperado = @{
+            por = '016c6a371bb1e4c48fe521908cf3ba3d751fade0ab846ad5d4086b563f5c528c'
+            eng = 'daa0c97d651c19fba3b25e81317cd697e9908c8208090c94c3905381c23fc047'
+          }
+          foreach ($l in 'por', 'eng') {
+            $arq = ".\Tesseract-OCR\tessdata\$l.traineddata"
+            Invoke-WebRequest "https://github.com/tesseract-ocr/tessdata/raw/$commit/$l.traineddata" -OutFile $arq
+            $obtido = (Get-FileHash $arq -Algorithm SHA256).Hash.ToLower()
+            if ($obtido -ne $esperado[$l]) { throw "SHA-256 diferente do esperado em $l.traineddata: $obtido" }
           }
           .\Tesseract-OCR\tesseract.exe --version
 
@@ -240,7 +249,9 @@ jobs:
           cat ../notas.md
 
       - name: Publicar
-        uses: softprops/action-gh-release@v2
+        # Ação de terceiros com permissão de escrita: fixada pelo commit exato (v2),
+        # para não mudar sem aviso. O Dependabot propõe as atualizações.
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         with:
           tag_name: ${{ format('v{0}', env.VERSAO) }}
           name: ${{ format('Conversor Markdown {0}', env.VERSAO) }}
