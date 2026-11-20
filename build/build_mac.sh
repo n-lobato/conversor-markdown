@@ -99,7 +99,16 @@ cp LEIA-ME-mac.txt "$DMG_DIR/LEIA-ME.txt"
 mkdir -p "$RAIZ/dist"
 SAIDA="$RAIZ/dist/Conversor-Markdown-v$VERSAO-mac-$NOME_ARQ.dmg"
 rm -f "$SAIDA"
-hdiutil create -volname "Conversor Markdown" -srcfolder "$DMG_DIR" -ov -format UDZO "$SAIDA" >/dev/null
+# Nas máquinas Mac do GitHub, o hdiutil às vezes falha com "Resource busy" sem motivo real;
+# tenta até 5 vezes antes de desistir.
+for tentativa in 1 2 3 4 5; do
+    if hdiutil create -volname "Conversor Markdown" -srcfolder "$DMG_DIR" -ov -format UDZO "$SAIDA" >/dev/null; then
+        break
+    fi
+    if [ "$tentativa" = 5 ]; then echo "ERRO: hdiutil falhou 5 vezes"; exit 1; fi
+    echo "    hdiutil falhou (tentativa $tentativa); tentando de novo em 15 s..."
+    sleep 15
+done
 # cópia do .app fora do .dmg, para o teste automático
 rm -rf "$RAIZ/dist/mac-app" && mkdir -p "$RAIZ/dist/mac-app" && cp -R "$APP" "$RAIZ/dist/mac-app/"
 rm -rf "$TMP"
