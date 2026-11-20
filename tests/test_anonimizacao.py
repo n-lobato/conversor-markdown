@@ -190,9 +190,10 @@ def test_janela_principal_tem_a_opcao(tmp_path, monkeypatch):
 
 def test_nome_do_arquivo_tambem_e_anonimizado(tmp_path):
     # o conteúdo era anonimizado, mas "laudo_maria_aparecida_de_souza_anonimizado.md" entregava o nome
-    origem = tmp_path / "Clientes" / "Maria Aparecida de Souza"
-    origem.mkdir(parents=True)
-    (origem / "laudo_maria_aparecida_de_souza.csv").write_text(CSV, encoding="utf-8")
+    origem = tmp_path / "Clientes"
+    sub = origem / "Cliente Maria Aparecida de Souza"  # subpasta recriada na saída
+    sub.mkdir(parents=True)
+    (sub / "laudo_maria_aparecida_de_souza.csv").write_text(CSV, encoding="utf-8")
     (origem / "outro.csv").write_text("Coluna\nsem dados pessoais\n", encoding="utf-8")
     saida = tmp_path / "saida"
     logs = []
@@ -201,6 +202,11 @@ def test_nome_do_arquivo_tambem_e_anonimizado(tmp_path):
     nomes = sorted(p.name for p in saida.rglob("*.md"))
     assert nomes == ["laudo_PESSOA_1_anonimizado.md", "outro_anonimizado.md"]
     assert "também foram anonimizados" in "\n".join(logs)
+    # nada na saída pode ter o nome: nem pastas, nem o título que repete o nome do arquivo
+    for p in saida.rglob("*"):
+        assert "maria" not in p.relative_to(saida).as_posix().lower()
+        if p.is_file():
+            assert "maria" not in p.read_text(encoding="utf-8").lower()
     # rodar de novo sem sobrescrever: reconhece os arquivos já gravados e não duplica
     ok, pulados, _ = cm.converter_lote([origem], saida, usar_ocr=False, log=lambda m: None, anonimizar=True)
     assert (ok, pulados) == (0, 2)

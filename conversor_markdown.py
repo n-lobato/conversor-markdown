@@ -40,7 +40,7 @@ if getattr(sys, "frozen", False):
 else:
     APP_DIR = Path(__file__).resolve().parent
 
-VERSAO = "1.3.4"
+VERSAO = "1.3.5"
 SUFIXO_ANONIMIZADO = "_anonimizado"
 
 # no .exe sem console, stdout/stderr nao existem; evita erro de bibliotecas que imprimem
@@ -591,7 +591,7 @@ def converter_lote(entradas, pasta_saida, usar_ocr=True, subpastas=True, sobresc
             erros.append((base, f"\n[{datetime.now():%d/%m/%Y %H:%M}] {nome_rel}\n{traceback.format_exc()}\n"))
 
     if anonimizar and pendentes and not (cancelar and cancelar()):
-        gravados, ja_existiam, anon = gravar_anonimizados(pendentes, log, revisar, sobrescrever)
+        gravados, ja_existiam, anon = gravar_anonimizados(pendentes, log, revisar, sobrescrever, pasta_saida)
         ok += gravados
         pulados += ja_existiam
     elif anonimizar and pendentes:
@@ -615,12 +615,13 @@ def converter_lote(entradas, pasta_saida, usar_ocr=True, subpastas=True, sobresc
     return ok, pulados, falhas
 
 
-def gravar_anonimizados(pendentes, log, revisar=None, sobrescrever=False):
+def gravar_anonimizados(pendentes, log, revisar=None, sobrescrever=False, pasta_saida=None):
     """Detecta os dados pessoais em todos os textos, pede a revisão e grava.
 
     Se algo falhar ou a revisão for cancelada, NADA é gravado: nunca sai um .md
     com dados pessoais quando a anonimização foi pedida. O nome do arquivo também
-    é anonimizado ("laudo_joao_silva" vira "laudo_PESSOA_1").
+    é anonimizado ("laudo_joao_silva" vira "laudo_PESSOA_1"), assim como o título que
+    repete esse nome dentro do Markdown e as subpastas recriadas dentro de pasta_saida.
     Devolve (gravados, pulados porque já existiam, anonimização ou None)."""
     try:
         from anonimizacao import VERSAO_MOTOR, Anonimizacao
@@ -645,7 +646,17 @@ def gravar_anonimizados(pendentes, log, revisar=None, sobrescrever=False):
     for destino, texto in saidas:
         original = destino.stem[:-len(SUFIXO_ANONIMIZADO)] if destino.stem.endswith(SUFIXO_ANONIMIZADO) else destino.stem
         novo = anon.aplicar_nome(original)
-        renomeados += novo != original
+        if novo != original:
+            renomeados += 1
+            texto = texto.replace(original, novo)  # título "# laudo_joao_silva" no início do .md
+        pasta = destino.parent
+        if pasta_saida is not None:
+            try:
+                rel = destino.parent.relative_to(pasta_saida)
+                pasta = Path(pasta_saida).joinpath(*(anon.aplicar_nome(p) for p in rel.parts))
+            except ValueError:
+                pass
+        destino = pasta / destino.name
         alvo = destino.with_name(novo + SUFIXO_ANONIMIZADO + destino.suffix)
         n = 2
         while str(alvo).casefold() in usados:  # dois nomes que viraram o mesmo código
