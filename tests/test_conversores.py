@@ -266,9 +266,13 @@ def test_nomes_que_so_diferem_em_maiusculas_nao_se_sobrescrevem(tmp_path):
     # no Mac e no Windows, Contrato.md e contrato.md seriam o mesmo arquivo
     origem = tmp_path / "origem"
     origem.mkdir()
+    # extensões diferentes, para os dois arquivos de origem existirem em qualquer sistema
     (origem / "Contrato.csv").write_text("A;B\n1;2\n", encoding="utf-8")
-    (origem / "contrato.CSV").write_text("C;D\n3;4\n", encoding="utf-8")
+    from openpyxl import Workbook
+    wb = Workbook()
+    wb.active.append(["C", "D"])
+    wb.save(origem / "contrato.xlsx")
     saida = tmp_path / "saida"
     ok, _, falhas = cm.converter_lote([origem], saida, usar_ocr=False, log=lambda m: None)
     assert (ok, falhas) == (2, 0)
-    assert sorted(p.name for p in saida.glob("*.md")) == ["Contrato.md", "contrato_csv.md"]
+    assert sorted(p.name for p in saida.glob("*.md")) == ["Contrato.md", "contrato_xlsx.md"]
